@@ -1,14 +1,10 @@
 # Visión (The Eye)
-opencv-python
 mediapipe
+opencv-python
 
 # IoT y Comunicación (The Messenger)
 # Se sugiere 'requests' para enviar mensajes rápido como indica el consejo técnico #3
-requests
 python-telegram-bot
-
-# Frontend / Interfaz (The Face)
-streamlit
 
 # Configuración y Variables de Entorno (Seguridad)
 python-dotenv
