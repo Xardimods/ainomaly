@@ -1,73 +1,93 @@
-import cv2
-import mediapipe as mp
-from fall_detector import FallDetector
-from chatbot import on_event
+import time
+from collections import deque
 
-mp_pose = mp.solutions.pose
-mp_drawing = mp.solutions.drawing_utils
+class FallDetector:
+    def __init__(self):
+        # Suavizado temporal
+        self.knee_hip_hist = deque(maxlen=5)
+        self.body_height_hist = deque(maxlen=5)
 
-detector = FallDetector()
-url = "rtsp://admin:123456@192.168.100.61:554/stream1"
+        # Estado persistente
+        self.last_state = None
+        self.state_count = 0
+        
+        self.fall_start_time = None
+        self.fall_confirmed = False
 
-cap = cv2.VideoCapture(url)
+    def smooth(self, value, hist):
+        hist.append(value)
+        return sum(hist) / len(hist)
 
-with mp_pose.Pose(
-        model_complexity=1,
-        min_detection_confidence=0.6,
-        min_tracking_confidence=0.6) as pose:
+    # ------------------------------------
+    # CLASIFICADOR DE POSTURA (TOP-DOWN)
+    # ------------------------------------
+    def classify_posture(self, lm):
 
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
+        ls = lm["left_shoulder"]
+        rs = lm["right_shoulder"]
+        lh = lm["left_hip"]
+        rh = lm["right_hip"]
+        lk = lm["left_knee"]
+        rk = lm["right_knee"]
 
-        img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        results = pose.process(img)
+        # Promedios
+        shoulder_y = (ls[1] + rs[1]) / 2
+        hip_y = (lh[1] + rh[1]) / 2
+        knee_y = (lk[1] + rk[1]) / 2
 
-        posture = "Desconocido"
+        # Métricas CLAVE para cámara alta
+        knee_hip = abs(knee_y - hip_y)
+        body_height = abs(shoulder_y - hip_y)
 
-        if results.pose_landmarks:
-            lm = results.pose_landmarks.landmark
+        # Suavizado
+        knee_hip = self.smooth(knee_hip, self.knee_hip_hist)
+        body_height = self.smooth(body_height, self.body_height_hist)
 
-            def p(i):
-                return (lm[i].x, lm[i].y)
+        # -----------------------------
+        # CLASIFICACIÓN
+        # -----------------------------
+        if body_height < 0.09:
+            state = "Caído"
 
-            coords = {
-                "left_shoulder": p(mp_pose.PoseLandmark.LEFT_SHOULDER),
-                "right_shoulder": p(mp_pose.PoseLandmark.RIGHT_SHOULDER),
-                "left_hip": p(mp_pose.PoseLandmark.LEFT_HIP),
-                "right_hip": p(mp_pose.PoseLandmark.RIGHT_HIP),
-                "left_knee": p(mp_pose.PoseLandmark.LEFT_KNEE),
-                "right_knee": p(mp_pose.PoseLandmark.RIGHT_KNEE),
-            }
+        elif knee_hip < 0.08:
+            state = "Sentado"
 
-            posture, event = detector.classify_posture(coords)
-            # Si hay un evento, comunica a chat bot
-            if event:
-                on_event(event, posture)
-                
-            mp_drawing.draw_landmarks(
-                frame,
-                results.pose_landmarks,
-                mp_pose.POSE_CONNECTIONS
-            )
-
-        # Colores
-        if posture == "De pie":
-            color = (0, 255, 0)
-        elif posture == "Sentado":
-            color = (0, 255, 255)
-        elif posture == "Caído":
-            color = (0, 0, 255)
         else:
-            color = (200, 200, 200)
+            state = "De pie"
 
-        cv2.putText(frame, posture, (30, 60),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1.4, color, 3)
+        # -----------------------------
+        # PERSISTENCIA (ANTI-PARPADEO)
+        # -----------------------------
+        if state == self.last_state:
+            self.state_count += 1
+        else:
+            self.state_count = 1
 
-        cv2.imshow("Detector", frame)
-        if cv2.waitKey(1) & 0xFF == 27:
-            break
+        if self.state_count >= 3:
+            self.last_state = state
+        
+        posture = self.last_state or state
+        
+        # Eventos
+        
+        event = None
+        now = time.time()
+        
+        # Detección de caída prolongada
+        if posture == "Caído":
+            if self.fall_start_time is None:
+                self.fall_start_time = now
+            
+            elif not self.fall_confirmed and now - self.fall_start_time >= 3:
+                self.fall_confirmed = True
+                event = "Caída confirmada"
+        else:
+            # Recuperacion
+            if self.fall_confirmed:
+                event = "Recuperación de caída"
+            
+            self.fall_start_time = None
+            self.fall_confirmed = False
+        return posture, event
+            
 
-cap.release()
-cv2.destroyAllWindows()
