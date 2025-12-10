@@ -1,85 +1,73 @@
-#Libreiras
-import cv2 
-import mediapipe as mp 
+import cv2
+import mediapipe as mp
 from fall_detector import FallDetector
+from chatbot import on_event
 
-#Inicializando mediapipe Pose
-mp_drawing = mp.solutions.drawing_utils # Utilidad para dibujar puntos y conexiones
-mp_pose = mp.solutions.pose # Solución de pose de mediapipe
+mp_pose = mp.solutions.pose
+mp_drawing = mp.solutions.drawing_utils
 
 detector = FallDetector()
+url = "rtsp://admin:123456@192.168.100.61:554/stream1"
 
-# Abrir la camara
-cap = cv2.VideoCapture(0) 
+cap = cv2.VideoCapture(url)
 
-# Crear modelo de deteccion de pose
 with mp_pose.Pose(
-    static_image_mode=False, # Procesamiento en tiempo real (False = modelo trabaja mas rapido)
-    model_complexity= 1, # Precision media para mejor rendimiento
-    enable_segmentation=False, # No se necesita segmentacion
-    min_detection_confidence=0.5, # Confianza minima para deteccion
-    min_tracking_confidence=0.5 # Confianza minima para seguimiento
-) as pose:
-    
-    while True:
-        success, frame = cap.read() # Leer un frame de la camara
-        frame = cv2.flip(frame, 1) # Voltear la imagen horizontalmente
-        if not success:
-            print("No se pudo acceder  la camara")
+        model_complexity=1,
+        min_detection_confidence=0.6,
+        min_tracking_confidence=0.6) as pose:
+
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
             break
-        
-        # Convertir la imagen de BGR(OpenCV) a RGB
-        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        
-        # Procesar la imagen con mediapipe Pose
-        results = pose.process(rgb_frame)
-        
-        # Dibujar punto y conexiones si se detecta una pose
+
+        img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        results = pose.process(img)
+
+        posture = "Desconocido"
+
         if results.pose_landmarks:
-            landmarks = results.pose_landmarks.landmark
-            
-            #Obtener coordenadas de los hombros
-            left_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER]
-            right_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER]
-            
-            #Obtener coordenadas de las caderas
-            left_hip = landmarks[mp_pose.PoseLandmark.LEFT_HIP]
-            right_hip = landmarks[mp_pose.PoseLandmark.RIGHT_HIP]
-            
-            # Obtener coordenadas de las rodillas
-            left_knee = landmarks[mp_pose.PoseLandmark.LEFT_KNEE]
-            right_knee = landmarks[mp_pose.PoseLandmark.RIGHT_KNEE]
-            
-            # Obtener coordenadas de los tobillos
-            left_ankle  = landmarks[mp_pose.PoseLandmark.LEFT_ANKLE]
-            right_ankle = landmarks[mp_pose.PoseLandmark.RIGHT_ANKLE]
+            lm = results.pose_landmarks.landmark
 
-            
-            # Obtener Estados
-            estado = detector.obtener_estado(
-                left_shoulder, right_shoulder,
-                left_hip, right_hip,
-                left_knee, right_knee,
-              
-            )
-            
-            cv2.putText(frame, f"Estado: {estado}", (10, 40),
-                cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 2)
+            def p(i):
+                return (lm[i].x, lm[i].y)
 
-            print("Estado:", estado)
-            
+            coords = {
+                "left_shoulder": p(mp_pose.PoseLandmark.LEFT_SHOULDER),
+                "right_shoulder": p(mp_pose.PoseLandmark.RIGHT_SHOULDER),
+                "left_hip": p(mp_pose.PoseLandmark.LEFT_HIP),
+                "right_hip": p(mp_pose.PoseLandmark.RIGHT_HIP),
+                "left_knee": p(mp_pose.PoseLandmark.LEFT_KNEE),
+                "right_knee": p(mp_pose.PoseLandmark.RIGHT_KNEE),
+            }
+
+            posture, event = detector.classify_posture(coords)
+            # Si hay un evento, comunica a chat bot
+            if event:
+                on_event(event, posture)
+                
             mp_drawing.draw_landmarks(
-                frame, # Imagen donde se dibujara
-                results.pose_landmarks, #Puntos detectados
-                mp_pose.POSE_CONNECTIONS, # Conexiones entre puntos
-                mp_drawing.DrawingSpec(color=(0,255,0), thickness=2, circle_radius=3),
-                mp_drawing.DrawingSpec(color=(255,0,0), thickness=2)
+                frame,
+                results.pose_landmarks,
+                mp_pose.POSE_CONNECTIONS
             )
-        # Mostrar la ventana
-        cv2.imshow("Deteccion de Pose", frame)
-        
-        # Salir si se presiona la tecla 'q'
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+
+        # Colores
+        if posture == "De pie":
+            color = (0, 255, 0)
+        elif posture == "Sentado":
+            color = (0, 255, 255)
+        elif posture == "Caído":
+            color = (0, 0, 255)
+        else:
+            color = (200, 200, 200)
+
+        cv2.putText(frame, posture, (30, 60),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.4, color, 3)
+
+        cv2.imshow("Detector", frame)
+        if cv2.waitKey(1) & 0xFF == 27:
             break
+
 cap.release()
 cv2.destroyAllWindows()
