@@ -1,58 +1,73 @@
-class FallDetector:
-    def __init__(self, stand_threshold= 0.33, sit_threshold = 0.22 , fall_threshold = 0.10):
-        
-        """ 
-        Umbrales:
-        stand_threshold: Umbral para detectar si una persona está de pie.
-        sit_threshold: Umbral para detectar si una persona está sentada.
-        fall_threshold: Umbral para detectar una caída.
-        """
-        self.stand_threshold = stand_threshold
-        self.sit_threshold = sit_threshold
-        self.fall_threshold = fall_threshold
-    
-    def avg_y(self, p1, p2):
-        return (p1.y + p2.y) / 2
-    
-    def torso_vertical(self, ls, rs, lh, rh):
-        """
-        Calcula la distancia vertical entre los hombros y las caderas.
-        """
-        avg_shoulder_y = self.avg_y(ls, rs)
-        avg_hip_y = self.avg_y(lh, rh)
-        return abs(avg_shoulder_y - avg_hip_y)
-    
-    def leg_fold_amount(self, lh, rh, lk, rk):
-        avg_hip_y = self.avg_y(lh, rh)
-        avg_knee_y = self.avg_y(lk, rk)
-        return abs(avg_hip_y - avg_knee_y)
+import cv2
+import mediapipe as mp
+from fall_detector import FallDetector
+from chatbot import on_event
 
-    def obtener_estado(self, ls, rs, lh, rh, lk, rk):
-        """
-        Determina el estado de la persona (de pie, sentada o caída) basado en las posiciones de los puntos clave.
-        
-        Parámetros:
-        ls: Punto clave del hombro izquierdo.
-        rs: Punto clave del hombro derecho.
-        lh: Punto clave de la cadera izquierda.
-        rh: Punto clave de la cadera derecha.
-        
-        Retorna:
-        Un string que indica el estado: "de pie", "sentada" o "caída".
-        """
-        torso_height = self.torso_vertical(ls, rs, lh, rh)
-        leg_fold = self.leg_fold_amount(lh, rh, lk, rk)
+mp_pose = mp.solutions.pose
+mp_drawing = mp.solutions.drawing_utils
 
-        # Persona de pie: torso alto y piernas estiradas
-        if torso_height > self.stand_threshold and leg_fold > 0.25:
-            return "de pie"
+detector = FallDetector()
+url = "rtsp://admin:123456@192.168.100.61:554/stream1"
 
-        # Sentado: torso bajo, piernas dobladas
-        if torso_height < self.stand_threshold and leg_fold < 0.25:
-            return "sentada"
+cap = cv2.VideoCapture(url)
 
-        # Caído: torso muy bajo PERO piernas casi estiradas (no dobladas como sentado)
-        if torso_height < self.sit_threshold and leg_fold > 0.20:
-            return "caída"
+with mp_pose.Pose(
+        model_complexity=1,
+        min_detection_confidence=0.6,
+        min_tracking_confidence=0.6) as pose:
 
-        return "desconocido"
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        results = pose.process(img)
+
+        posture = "Desconocido"
+
+        if results.pose_landmarks:
+            lm = results.pose_landmarks.landmark
+
+            def p(i):
+                return (lm[i].x, lm[i].y)
+
+            coords = {
+                "left_shoulder": p(mp_pose.PoseLandmark.LEFT_SHOULDER),
+                "right_shoulder": p(mp_pose.PoseLandmark.RIGHT_SHOULDER),
+                "left_hip": p(mp_pose.PoseLandmark.LEFT_HIP),
+                "right_hip": p(mp_pose.PoseLandmark.RIGHT_HIP),
+                "left_knee": p(mp_pose.PoseLandmark.LEFT_KNEE),
+                "right_knee": p(mp_pose.PoseLandmark.RIGHT_KNEE),
+            }
+
+            posture, event = detector.classify_posture(coords)
+            # Si hay un evento, comunica a chat bot
+            if event:
+                on_event(event, posture)
+                
+            mp_drawing.draw_landmarks(
+                frame,
+                results.pose_landmarks,
+                mp_pose.POSE_CONNECTIONS
+            )
+
+        # Colores
+        if posture == "De pie":
+            color = (0, 255, 0)
+        elif posture == "Sentado":
+            color = (0, 255, 255)
+        elif posture == "Caído":
+            color = (0, 0, 255)
+        else:
+            color = (200, 200, 200)
+
+        cv2.putText(frame, posture, (30, 60),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.4, color, 3)
+
+        cv2.imshow("Detector", frame)
+        if cv2.waitKey(1) & 0xFF == 27:
+            break
+
+cap.release()
+cv2.destroyAllWindows()
