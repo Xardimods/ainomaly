@@ -1,6 +1,5 @@
 import streamlit as st
 import base64
-import os
 
 # ============================================
 # 1. CONFIGURACIÓN DE PÁGINA
@@ -13,38 +12,33 @@ st.set_page_config(
 )
 
 # ============================================
-# 📍 CONFIGURACIÓN DE IMÁGENES (EDITA AQUÍ)
+# 📍 CONFIGURACIÓN DE IMÁGENES
 # ============================================
-# Pon aquí el nombre exacto de tus archivos locales.
-# Si no encuentra la imagen, usará una de internet por defecto para que no falle.
-
 def get_base64_image(image_path):
-    """Convierte imagen local a string base64 para CSS"""
     try:
         with open(image_path, "rb") as img_file:
             return base64.b64encode(img_file.read()).decode()
     except FileNotFoundError:
         return None
 
-# --- RUTAS DE TUS IMÁGENES ---
-# Asegúrate de que estas imágenes estén en la misma carpeta o pon la ruta completa
-ruta_hero_bg = "hero_obrero.jpg"       # <--- CAMBIA ESTO por tu foto del obrero
-ruta_industria = "industria.jpg"       # <--- CAMBIA ESTO por tu foto de fábrica
-ruta_hogar = "abuelo.jpg"              # <--- CAMBIA ESTO por tu foto del anciano
+# --- Reemplaza con tus nombres de archivo ---
+ruta_hero_bg = "hero_obrero.jpg"
+ruta_industria = "industria.jpg"
+ruta_hogar = "abuelo.jpg"
 
-# --- PROCESAMIENTO (NO TOCAR) ---
+# Procesamiento
 img_hero_b64 = get_base64_image(ruta_hero_bg)
 img_ind_b64 = get_base64_image(ruta_industria)
 img_home_b64 = get_base64_image(ruta_hogar)
 
-# Fallbacks (Si no encuentra tus fotos, usa estas de internet)
+# Fallbacks (imágenes de internet si no encuentra las locales)
 url_hero = f"data:image/jpeg;base64,{img_hero_b64}" if img_hero_b64 else "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=1000&auto=format&fit=crop"
 url_ind = f"data:image/jpeg;base64,{img_ind_b64}" if img_ind_b64 else "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800"
 url_home = f"data:image/jpeg;base64,{img_home_b64}" if img_home_b64 else "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&w=800"
 
 
 # ============================================
-# 2. ESTILOS CSS
+# 2. ESTILOS CSS (MODO CLARO FORZADO)
 # ============================================
 st.markdown(f"""
 <style>
@@ -54,14 +48,39 @@ st.markdown(f"""
         --primary: #000080;
         --accent: #FFD700;
         --text-dark: #1F2937;
+        --bg-white: #FFFFFF;
     }}
+
+    /* === FORZAR MODO CLARO (LIGHT MODE) === */
+    /* Esto sobreescribe el tema oscuro del sistema */
+    [data-testid="stAppViewContainer"] {{
+        background-color: white !important;
+        color: var(--text-dark) !important;
+    }}
+    [data-testid="stHeader"] {{
+        background-color: rgba(255, 255, 255, 0) !important; /* Header transparente */
+    }}
+    [data-testid="stSidebar"] {{
+        background-color: #f8f9fa !important; 
+    }}
+    /* Forzar color de textos generales */
+    p, span, div, li {{
+        color: #374151;
+    }}
+    /* Forzar inputs para que no se vean oscuros */
+    input, textarea, select, div[data-baseweb="select"] {{
+        background-color: white !important;
+        color: black !important;
+        border-color: #e5e7eb !important;
+    }}
+    /* ========================================= */
 
     html, body, [class*="css"] {{
         font-family: 'Inter', sans-serif;
         scroll-behavior: smooth;
     }}
     
-    #MainMenu, footer, header {{visibility: hidden;}}
+    #MainMenu, footer {{visibility: hidden;}}
     .block-container {{ padding-top: 2rem; }}
 
     /* NAVBAR */
@@ -75,8 +94,8 @@ st.markdown(f"""
     }}
     .nav-logo {{ font-size: 1.5rem; font-weight: 700; color: var(--primary); text-decoration: none; }}
     .nav-links {{ display: flex; gap: 2rem; }}
-    .nav-link {{ color: #4B5563; text-decoration: none; font-weight: 600; transition: color 0.3s; }}
-    .nav-link:hover {{ color: var(--primary); }}
+    .nav-link {{ color: #4B5563 !important; text-decoration: none; font-weight: 600; transition: color 0.3s; }}
+    .nav-link:hover {{ color: var(--primary) !important; }}
     .nav-cta {{ background: var(--primary); color: white !important; padding: 0.5rem 1.2rem; border-radius: 0.5rem; }}
 
     /* TARJETAS */
@@ -100,8 +119,9 @@ st.markdown(f"""
         border-radius: 1rem; display: flex; justify-content: space-around;
         text-align: center; margin: 3rem 0; flex-wrap: wrap; gap: 1rem;
     }}
+    .stats-bar h3, .stats-bar p {{ color: white !important; }} /* Forzar texto blanco en barra azul */
 
-    /* IMAGENES DE FONDO DINÁMICAS (Aquí usamos las variables Python) */
+    /* IMAGENES */
     .hero-image {{
         background-image: url('{url_hero}');
         background-size: cover; background-position: center;
@@ -110,13 +130,11 @@ st.markdown(f"""
         border: 4px solid white;
         box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
     }}
-    
     .img-industry {{
         background-image: url('{url_ind}');
         background-size: cover; background-position: center;
         height: 300px; border-radius: 15px;
     }}
-    
     .img-home {{
         background-image: url('{url_home}');
         background-size: cover; background-position: center;
@@ -124,13 +142,18 @@ st.markdown(f"""
     }}
 
     .step-circle {{
-        width: 4rem; height: 4rem; background: var(--primary); color: white;
+        width: 4rem; height: 4rem; background: var(--primary); color: white !important;
         border-radius: 50%; display: flex; align-items: center; justify-content: center;
         font-size: 1.5rem; font-weight: bold; margin: 0 auto 1rem auto;
         border: 4px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }}
     
     .section-divider {{ margin-top: 5rem; margin-bottom: 2rem; }}
+    
+    /* Títulos forzados a azul */
+    h1, h2, h3, h4, h5, h6 {{
+        color: var(--primary) !important;
+    }}
 
 </style>
 """, unsafe_allow_html=True)
@@ -167,10 +190,10 @@ with col1:
     </div>
     """, unsafe_allow_html=True)
     st.title("Alnomaly")
-    st.markdown("<h2 style='font-size: 2rem; margin-top: -10px; color:#000080;'>Detector Inteligente de Anomalías</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='font-size: 2rem; margin-top: -10px;'>Detector Inteligente de Anomalías</h2>", unsafe_allow_html=True)
     st.markdown("""
-    <p style="font-size: 1.25rem; font-style: italic; color: #4B5563; margin-top: 1rem;">"Donde otros ven video, nosotros vemos riesgos."</p>
-    <p style="font-size: 1.1rem; line-height: 1.6; color: #374151; margin-bottom: 2rem;">
+    <p style="font-size: 1.25rem; font-style: italic; margin-top: 1rem;">"Donde otros ven video, nosotros vemos riesgos."</p>
+    <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 2rem;">
         Transforma una cámara estándar en un sensor inteligente. Utilizando visión por computadora y heurística geométrica, Alnomaly detecta caídas en tiempo real.
     </p>
     """, unsafe_allow_html=True)
@@ -180,22 +203,21 @@ with col1:
         st.link_button("Solicitar Demo ➜", "#contacto", type="primary")
 
 with col2:
-    # Usamos la clase .hero-image que tiene inyectado el B64
     st.markdown('<div class="hero-image"></div>', unsafe_allow_html=True)
 
 # BARRA ESTADÍSTICAS
 st.markdown("""
 <div class="stats-bar">
-    <div><h3 style="color:#FFD700 !important; margin:0;">MediaPipe</h3><p style="margin:0; color:#BFDBFE;">Visión por Computadora</p></div>
-    <div><h3 style="color:#FFD700 !important; margin:0;">&lt; 1seg</h3><p style="margin:0; color:#BFDBFE;">Tiempo de Respuesta</p></div>
-    <div><h3 style="color:#FFD700 !important; margin:0;">24/7</h3><p style="margin:0; color:#BFDBFE;">Monitoreo Continuo</p></div>
-    <div><h3 style="color:#FFD700 !important; margin:0;">Local</h3><p style="margin:0; color:#BFDBFE;">Procesamiento Privado</p></div>
+    <div><h3 style="color:#FFD700 !important; margin:0;">MediaPipe</h3><p style="margin:0; color:#BFDBFE !important;">Visión por Computadora</p></div>
+    <div><h3 style="color:#FFD700 !important; margin:0;">&lt; 1seg</h3><p style="margin:0; color:#BFDBFE !important;">Tiempo de Respuesta</p></div>
+    <div><h3 style="color:#FFD700 !important; margin:0;">24/7</h3><p style="margin:0; color:#BFDBFE !important;">Monitoreo Continuo</p></div>
+    <div><h3 style="color:#FFD700 !important; margin:0;">Local</h3><p style="margin:0; color:#BFDBFE !important;">Procesamiento Privado</p></div>
 </div>
 """, unsafe_allow_html=True)
 
 # --- DIFERENCIADORES ---
 st.markdown('<div id="diferencia" class="section-divider"></div>', unsafe_allow_html=True)
-st.markdown("<h2 style='text-align: center; color:#000080;'>Por qué Alnomaly es Diferente</h2>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align: center;'>Por qué Alnomaly es Diferente</h2>", unsafe_allow_html=True)
 st.markdown("<br>", unsafe_allow_html=True)
 
 col_diff1, col_diff2, col_diff3, col_diff4 = st.columns(4)
@@ -210,7 +232,7 @@ with col_diff4:
 
 # --- SECTORES ---
 st.markdown('<div id="sectores" class="section-divider"></div>', unsafe_allow_html=True)
-st.markdown("<h2 style='color:#000080;'>Soluciones para Cada Necesidad</h2><hr>", unsafe_allow_html=True)
+st.markdown("<h2>Soluciones para Cada Necesidad</h2><hr>", unsafe_allow_html=True)
 
 # Sector 1
 s1, s2 = st.columns([1, 1])
@@ -244,7 +266,7 @@ with s4:
 
 # --- ARQUITECTURA ---
 st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
-st.markdown("<h2 style='text-align: center; color:#000080;'>Arquitectura del Sistema</h2><br>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align: center;'>Arquitectura del Sistema</h2><br>", unsafe_allow_html=True)
 
 a1, a2, a3, a4 = st.columns(4)
 steps = [
@@ -259,7 +281,7 @@ for col, (num, title, subt, desc) in zip([a1, a2, a3, a4], steps):
         st.markdown(f"""
         <div class="custom-card" style="text-align: center;">
             <div class="step-circle">{num}</div>
-            <h4 style="color:#000080;">{title}</h4>
+            <h4>{title}</h4>
             <p style="font-size: 0.9rem;"><b>{subt}</b><br>{desc}</p>
         </div>
         """, unsafe_allow_html=True)
@@ -268,7 +290,7 @@ for col, (num, title, subt, desc) in zip([a1, a2, a3, a4], steps):
 st.markdown('<div id="demo" class="section-divider"></div>', unsafe_allow_html=True)
 st.markdown("""
 <div style="background-color: #f8fafc; padding: 2rem; border-radius: 1rem; border: 1px dashed #cbd5e1;">
-<h2 style="text-align: center; color:#000080;">📱 Demo Interactiva</h2>
+<h2 style="text-align: center;">📱 Demo Interactiva</h2>
 <p style="text-align: center;">Simula el comportamiento del sistema.</p>
 <br>
 """, unsafe_allow_html=True)
@@ -301,11 +323,11 @@ with c1:
     st.markdown("""
     <div class="custom-card" style="background: #000080; color: white;">
         <h3 style="color: #FFD700 !important;">Contáctanos</h3>
-        <p>¿Tienes cámaras instaladas? Podemos integrarnos.</p>
+        <p style="color:white;">¿Tienes cámaras instaladas? Podemos integrarnos.</p>
         <br>
         <ul style="list-style: none; padding: 0;">
-            <li style="margin-bottom: 10px;">📧 contacto@alnomaly.com</li>
-            <li style="margin-bottom: 10px;">📞 +1 (800) 123-4567</li>
+            <li style="margin-bottom: 10px; color:white;">📧 contacto@alnomaly.com</li>
+            <li style="margin-bottom: 10px; color:white;">📞 +1 (800) 123-4567</li>
         </ul>
     </div>
     """, unsafe_allow_html=True)
@@ -323,6 +345,6 @@ st.markdown("""
 <div style="background: #000080; color: white; padding: 4rem 2rem; text-align: center;">
     <h3 style="color: white !important;">Alnomaly</h3>
     <p style="color: #BFDBFE;">Inteligencia Artificial que cuida vidas.</p>
-    <p style="font-size: 0.8rem; opacity: 0.6;">© 2025 Alnomaly Technologies.</p>
+    <p style="font-size: 0.8rem; opacity: 0.6; color: #BFDBFE;">© 2025 Alnomaly Technologies.</p>
 </div>
 """, unsafe_allow_html=True)
