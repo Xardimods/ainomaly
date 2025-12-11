@@ -5,6 +5,7 @@ import streamlit as st
 import base64
 from PIL import Image
 import io
+from pathlib import Path
 
 # Configuración de la página
 st.set_page_config(
@@ -64,7 +65,10 @@ def card_component(title, content, icon=None):
 
 # Barra lateral para navegación
 with st.sidebar:
-    st.image(r"frontend/Logo_AInomaly.png", width=80)
+    current_dir = Path(__file__).resolve().parent
+    logo_path = current_dir / "Logo_AInomaly.png"
+
+    st.image(str(logo_path), width=80)
     st.title("🛡️ AInomaly")
     st.markdown("---")
     
