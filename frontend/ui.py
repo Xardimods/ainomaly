@@ -1,772 +1,510 @@
-# AInomaly_app.py
-# Archivo principal de la aplicación Streamlit para AInomaly
-
 import streamlit as st
-import base64
 from PIL import Image
-import io
-from pathlib import Path
+import base64
 
-# Configuración de la página
+# ============================================
+# 1. CONFIGURACIÓN DE PÁGINA
+# ============================================
 st.set_page_config(
-    page_title="AInomaly - Guardián Digital",
+    page_title="Alnomaly - Detección Inteligente",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # ============================================
-# FUNCIONES AUXILIARES
+# 2. ESTILOS CSS PERSONALIZADOS (El Diseño Visual)
 # ============================================
+# Aquí inyectamos el CSS para copiar el estilo de la landing HTML (Tailwind-like)
+st.markdown("""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
-def add_bg_from_local(image_file):
-    """Función para agregar fondo de imagen"""
-    with open(image_file, "rb") as f:
-        encoded_string = base64.b64encode(f.read()).decode()
-    st.markdown(
-        f"""
-        <style>
-        .stApp {{
-            background-image: url(data:image/png;base64,{encoded_string});
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
+    /* Variables de color basadas en tu diseño */
+    :root {
+        --primary: #000080;   /* Azul Marino */
+        --accent: #FFD700;    /* Amarillo */
+        --bg-light: #F3F4F6;
+        --text-dark: #1F2937;
+    }
 
-def card_component(title, content, icon=None):
-    """Componente de tarjeta para presentar información"""
-    icon_html = f"<div style='font-size: 2.5rem; margin-bottom: 10px;'>{icon}</div>" if icon else ""
-    
-    card_html = f"""
-    <div style='
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 15px;
-        padding: 25px;
-        margin: 15px 0;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        border-left: 5px solid #4A6FA5;
-        min-height: 200px;
-        transition: transform 0.3s;
-    '>
-        {icon_html}
-        <h3 style='color: #2C3E50; margin-top: 0;'>{title}</h3>
-        <p style='color: #FFFF; line-height: 1.6;'>{content}</p>
-    </div>
-    """
-    return card_html
+    /* Fuente general */
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif;
+        color: var(--text-dark);
+    }
+
+    /* Títulos */
+    h1, h2, h3 {
+        color: var(--primary) !important;
+        font-weight: 700 !important;
+    }
+
+    /* Fondo de la app principal */
+    .stApp {
+        background-color: white;
+    }
+
+    /* === COMPONENTES PERSONALIZADOS === */
+
+    /* Tarjeta estilo Landing Page */
+    .custom-card {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 1rem;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        transition: transform 0.2s;
+        height: 100%;
+    }
+    .custom-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        border-color: #BFDBFE;
+    }
+
+    /* Iconos en tarjetas */
+    .icon-box {
+        width: 3rem;
+        height: 3rem;
+        background-color: #FEF9C3; /* Amarillo claro */
+        color: var(--primary);
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Barra de Estadísticas Azul */
+    .stats-bar {
+        background-color: var(--primary);
+        color: white;
+        padding: 2rem;
+        border-radius: 1rem;
+        display: flex;
+        justify-content: space-around;
+        text-align: center;
+        margin: 2rem 0;
+    }
+    .stat-item h3 { color: var(--accent) !important; margin: 0; font-size: 1.5rem; }
+    .stat-item p { color: #BFDBFE; margin: 0; font-size: 0.9rem; }
+
+    /* Botones de Streamlit personalizados */
+    div.stButton > button {
+        background-color: var(--primary);
+        color: white;
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        border: none;
+        font-weight: 600;
+        width: 100%;
+    }
+    div.stButton > button:hover {
+        background-color: #000060;
+        color: var(--accent);
+    }
+
+    /* Badge pequeña */
+    .badge {
+        background-color: #FEF9C3;
+        color: #854D0E;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #FEF08A;
+    }
+
+    /* Círculos de pasos (Arquitectura) */
+    .step-circle {
+        width: 4rem;
+        height: 4rem;
+        background-color: var(--primary);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin: 0 auto 1rem auto;
+        border: 4px solid white;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+</style>
+""", unsafe_allow_html=True)
 
 # ============================================
-# ENCABEZADO Y NAVEGACIÓN
+# 3. BARRA LATERAL (NAVEGACIÓN)
 # ============================================
-
-# Barra lateral para navegación
 with st.sidebar:
-    current_dir = Path(__file__).resolve().parent
-    logo_path = current_dir / "Logo_AInomaly.png"
-
-    st.image(str(logo_path), width=80)
-    st.title("🛡️ AInomaly")
+    # Si tienes un logo, descomenta esto:
+    # st.image("logo.png", width=150)
+    
+    st.markdown("<h2 style='text-align: center;'>🛡️ Alnomaly</h2>", unsafe_allow_html=True)
     st.markdown("---")
     
-    # Navegación
+    # Menú de navegación
     page = st.radio(
         "Navegación",
-        ["🏠 Inicio", "🔍 El Problema", "💡 La Solución", "✨ Beneficios", "📱 Cómo Funciona", "📞 Contacto"]
+        ["🏠 Inicio", "💡 Soluciones (Sectores)", "⚙️ Arquitectura", "✨ Características", "📱 Demo Interactiva", "📞 Contacto"]
     )
     
     st.markdown("---")
-    st.markdown("### Demostración")
-    if st.button("🎬 Ver Demo en Vivo"):
-        st.info("Funcionalidad de demo disponible en versión completa ;)")
+    st.info("Estado del Sistema: 🟢 Activo")
+    st.caption("v2.4.0 - Build 2025")
+
+# ============================================
+# 4. CONTENIDO DE LAS PÁGINAS
+# ============================================
+
+# --- PÁGINA: INICIO (HERO SECTION) ---
+if page == "🏠 Inicio":
     
-    st.markdown("---")
+    # Hero Section
+    col1, col2 = st.columns([1.2, 1])
+    
+    with col1:
+        st.markdown("""
+        <div class="badge">
+            <span>🛡️</span> Tecnología de Detección Avanzada con IA
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.title("Alnomaly")
+        st.markdown("<h2 style='font-size: 1.8rem; margin-top: -15px; opacity: 0.9;'>Detector Inteligente de Anomalías y Caídas</h2>", unsafe_allow_html=True)
+        
+        st.markdown("""
+        <p style="font-size: 1.2rem; font-style: italic; color: #4B5563; margin-bottom: 1.5rem;">
+            "Donde otros ven video, nosotros vemos riesgos."
+        </p>
+        <p style="font-size: 1.1rem; line-height: 1.6; color: #374151; margin-bottom: 2rem;">
+            Transforma una cámara estándar en un sensor inteligente. Utilizando visión por computadora y heurística geométrica, 
+            Alnomaly detecta caídas y comportamientos anómalos en tiempo real.
+        </p>
+        """, unsafe_allow_html=True)
+        
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("Solicitar Demo ➜"):
+                st.toast("Redirigiendo a solicitud de demo...")
+        with c2:
+            st.button("Ver Características", type="secondary")
+
+    with col2:
+        # Placeholder para imagen (puedes reemplazar con st.image("tu_imagen.jpg"))
+        st.markdown("""
+        <div style="background-color: #EEE; height: 400px; border-radius: 20px; display: flex; align-items: center; justify-content: center; border: 4px solid white; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
+            <p style="color: #999;">[Imagen Hero: Obrero Cayendo]</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Barra Azul de Estadísticas
     st.markdown("""
-    <div style='background-color: #fffff; padding: 15px; border-radius: 10px;'>
-    <small>🛡️ Transformando cámaras comunes en sistemas de seguridad inteligentes</small>
+    <div class="stats-bar">
+        <div class="stat-item">
+            <h3>MediaPipe</h3>
+            <p>Visión por Computadora</p>
+        </div>
+        <div class="stat-item">
+            <h3>< 1seg</h3>
+            <p>Tiempo de Respuesta</p>
+        </div>
+        <div class="stat-item">
+            <h3>24/7</h3>
+            <p>Monitoreo Continuo</p>
+        </div>
+        <div class="stat-item">
+            <h3>Local</h3>
+            <p>Procesamiento Privado</p>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
-# ============================================
-# PÁGINA PRINCIPAL
-# ============================================
-
-if page == "🏠 Inicio":
+    # Diferenciadores (Grid 2x2)
+    st.subheader("Por qué Alnomaly es diferente")
+    st.markdown("<br>", unsafe_allow_html=True)
     
-    # Header principal
-    col1, col2 = st.columns([2, 1])
-    
-    with col1:
-        st.markdown(
-            """
-            <div style='padding: 20px 0;'>
-            <h1 style='color: #ffde59; font-size: 3.5rem; margin-bottom: 10px;'>
-            🛡️ AInomaly
-            </h1>
-            <h2 style='color: #ffde59; font-size: 1.8rem; margin-top: 0;'>
-            Tu Guardián Digital Inteligente
-            </h2>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+    d1, d2 = st.columns(2)
+    with d1:
+        st.markdown("""
+        <div class="custom-card">
+            <div class="icon-box">⚡</div>
+            <h3>Detección en Tiempo Real</h3>
+            <p>Procesamiento inmediato de frames de video sin latencia. Respuesta instantánea.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("""
+        <div class="custom-card">
+            <div class="icon-box">📐</div>
+            <h3>Lógica Geométrica</h3>
+            <p>Alta precisión basada en vectores y ángulos, sin necesidad de redes pesadas.</p>
+        </div>
+        """, unsafe_allow_html=True)
         
-        st.markdown(
-            """
-            <div style='background: linear-gradient(135deg, #4A6FA5, #2C3E50); 
-                        padding: 30px; 
-                        border-radius: 15px;
-                        color: white;
-                        margin: 20px 0;'>
-            <h3 style='color: white;'>🚨 Transformamos cualquier cámara común en un sistema inteligente</h3>
-            <p style='font-size: 1.2rem;'>
-            Detectamos caídas y situaciones peligrosas en tiempo real, sin necesidad de comprar equipos nuevos.
-            </p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    
-    with col2:
-        # Espacio para imagen principal
-        st.markdown(
-            """
-            <div style='background-color: #f8f9fa; 
-                        padding: 20px; 
-                        border-radius: 15px;
-                        text-align: center;
-                        height: 300px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        border: 2px dashed #4A6FA5;'>
-            <p style='color: #4A6FA5;'>📷 Espacio para imagen de AInomaly en acción</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        # Nota para el usuario: Aquí puedes agregar tu imagen con:
-        # st.image("ruta_de_tu_imagen.jpg", use_column_width=True)
-    
+    with d2:
+        st.markdown("""
+        <div class="custom-card">
+            <div class="icon-box">🔒</div>
+            <h3>Privacidad Total</h3>
+            <p>El análisis ocurre localmente. Solo se transmiten alertas, nunca video continuo.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("""
+        <div class="custom-card">
+            <div class="icon-box">📱</div>
+            <h3>Alertas Remotas</h3>
+            <p>Conexión directa al móvil del cuidador vía Telegram con evidencia fotográfica.</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-    # Mensaje emocional
-    st.markdown("---")
-    col1, col2, col3 = st.columns(3)
-    
-    with col2:
-        st.markdown(
-            """
-            <div style='text-align: center; padding: 25px; background-color: #FFFFF; color: white; border-radius: 30px;'>
-            <h3 style='color: white;'>
-            <p style='font-size: 1.1rem;'>
-            No vendemos un software. Vendemos <strong>tranquilidad</strong>: 
-            Saber que si algo le pasa a alguien bajo la responsabilidad de la empresa, 
-            no será ignorado ni descubierto demasiado tarde.
-            </p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+# --- PÁGINA: SOLUCIONES (SECTORES) ---
+elif page == "💡 Soluciones (Sectores)":
+    st.header("Soluciones para Cada Necesidad")
+    st.markdown("Adaptamos nuestro sistema a diferentes ambientes.")
+    st.divider()
 
-# ============================================
-# PÁGINA: EL PROBLEMA
-# ============================================
-
-elif page == "🔍 El Problema":
-    
-    st.title("🔍 El Problema que Resolvemos")
-    
+    # Sector Industria
     col1, col2 = st.columns(2)
-    
     with col1:
-        st.markdown(card_component(
-            "👵 Personas Vulnerables",
-            "Empresas que manejan adultos mayores, pacientes, trabajadores en riesgo o necesitan vigilancia constante enfrentan desafíos de seguridad diarios.",
-            "👵"
-        ), unsafe_allow_html=True)
+        st.markdown("""
+        <div style="background-color: #FEF9C3; color: #854D0E; padding: 5px 10px; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 0.8rem; margin-bottom: 10px;">SECTOR</div>
+        """, unsafe_allow_html=True)
+        st.subheader("Industria Manufacturera")
+        st.markdown("""
+        Protección para trabajadores en plantas de producción, almacenes y líneas de ensamblaje. 
+        Una cámara cubre amplias áreas sin necesidad de sensores individuales.
         
-        st.markdown(card_component(
-            "⏰ Detección Tardía",
-            "Normalmente las caídas y situaciones peligrosas se detectan tarde, cuando ya pasó lo peor. Cada minuto cuenta en una emergencia.",
-            "⏰"
-        ), unsafe_allow_html=True)
-    
+        * ✅ Reduce accidentes laborales
+        * ✅ Cumplimiento normativo
+        * ✅ Monitoreo de múltiples trabajadores
+        """)
     with col2:
-        # Espacio para imagen ilustrativa del problema
-        st.markdown(
-            """
-            <div style='background-color: #f8f9fa; 
-                        padding: 20px; 
-                        border-radius: 15px;
-                        text-align: center;
-                        height: 300px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        margin-top: 80px;
-                        border: 2px dashed #ffde59;'>
-            <p style='color: #e74c3c;'>🖼️ Espacio para imagen ilustrando el problema</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    
-    # Estadísticas (puedes personalizar)
-    st.markdown("---")
-    st.markdown("### El Impacto Real")
-    
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        st.markdown(
-            """
-            <div style='text-align: center; padding: 20px; background-color: #FFFFF; border-radius: 10px;'>
-            <h1 style='color: #e74c3c;'>30%</h1>
-            <p>De adultos mayores sufren caídas anuales</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    
-    with col2:
-        st.markdown(
-            """
-            <div style='text-align: center; padding: 20px; background-color: #FFFFF; border-radius: 10px;'>
-            <h1 style='color: #e74c3c;'>65%</h1>
-            <p>De accidentes laborales son por caídas</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    
+        st.markdown("""
+        <div style="background-color: #DDD; height: 250px; border-radius: 15px; display: flex; align-items: center; justify-content: center;">
+            <p>[Imagen Industria]</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.divider()
+
+    # Sector Hogar
+    col3, col4 = st.columns(2)
     with col3:
-        st.markdown(
-            """
-            <div style='text-align: center; padding: 20px; background-color: #FFFFF; border-radius: 10px;'>
-            <h1 style='color: #e74c3c;'>+30 min</h1>
-            <p>Tiempo promedio de respuesta actual</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    
+        st.markdown("""
+        <div style="background-color: #DDD; height: 250px; border-radius: 15px; display: flex; align-items: center; justify-content: center;">
+            <p>[Imagen Cuidado Hogar]</p>
+        </div>
+        """, unsafe_allow_html=True)
     with col4:
-        st.markdown(
-            """
-            <div style='text-align: center; padding: 20px; background-color: #FFFFF; border-radius: 10px;'>
-            <h1 style='color: #e74c3c;'>90%</h1>
-            <p>Reducción posible con detección inmediata</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        st.markdown("""
+        <div style="background-color: #FEF9C3; color: #854D0E; padding: 5px 10px; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 0.8rem; margin-bottom: 10px;">SECTOR</div>
+        """, unsafe_allow_html=True)
+        st.subheader("Cuidado en el Hogar")
+        st.markdown("""
+        Seguridad para adultos mayores y personas con movilidad reducida que viven solas. 
+        Alertas instantáneas a familiares sin invadir la privacidad.
+        
+        * ✅ Tranquilidad para familias
+        * ✅ Independencia sin vigilancia invasiva
+        * ✅ Evidencia fotográfica del incidente
+        """)
 
-# ============================================
-# PÁGINA: LA SOLUCIÓN
-# ============================================
+# --- PÁGINA: ARQUITECTURA ---
+elif page == "⚙️ Arquitectura":
+    st.header("Arquitectura del Sistema")
+    st.markdown("Cuatro módulos principales operando en simultáneo.")
+    st.markdown("<br><br>", unsafe_allow_html=True)
 
-elif page == "💡 La Solución":
-    
-    st.title("💡 ¿Qué hace AInomaly?")
-    
-    st.markdown(
-        """
-        <div style='background: linear-gradient(135deg, #4A6FA5, #2C3E50); 
-                    padding: 30px; 
-                    border-radius: 15px;
-                    color: white;
-                    margin: 20px 0;'>
-        <h2 style='color: white;'>👁️ Observa silenciosamente y actúa inmediatamente</h2>
-        <p style='font-size: 1.2rem;'>
-        AInomaly no se queda solo mirando: cuando detecta una caída o situación peligrosa, 
-        envía una alerta inmediata al celular del encargado para que puedan actuar rápido.
-        </p>
+    # Layout de 4 columnas para los pasos
+    c1, c2, c3, c4 = st.columns(4)
+
+    with c1:
+        st.markdown("""
+        <div class="custom-card" style="text-align: center;">
+            <div class="step-circle">1</div>
+            <h4 style="color:#000080;">The Eye</h4>
+            <p style="font-size: 0.9rem;"><b>Visión</b><br>Captura video y extrae el esqueleto humano mediante MediaPipe.</p>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
-    
-    # Características principales
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown(card_component(
-            "🚨 Alertas Inmediatas",
-            "Notificaciones instantáneas al teléfono del supervisor cuando detecta una caída o situación anormal.",
-            "🚨"
-        ), unsafe_allow_html=True)
-        
-        st.markdown(card_component(
-            "🤖 IA Avanzada",
-            "Algoritmos de inteligencia artificial entrenados para reconocer patrones de caídas y situaciones de riesgo.",
-            "🤖"
-        ), unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown(card_component(
-            "📱 Interfaz Sencilla",
-            "Panel de control intuitivo que cualquier persona puede usar sin necesidad de entrenamiento especializado.",
-            "📱"
-        ), unsafe_allow_html=True)
-        
-        st.markdown(card_component(
-            "⚡ Tiempo Real",
-            "Análisis continuo de video 24/7 sin retrasos. Cada segundo cuenta en una emergencia.",
-            "⚡"
-        ), unsafe_allow_html=True)
-    
-    # Diagrama de funcionamiento (simulado)
-    st.markdown("---")
-    st.markdown("### 🔄 Flujo de Funcionamiento")
-    
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        st.markdown(
-            """
-            <div style='text-align: center;'>
-            <div style='background-color: #4A6FA5; color: white; width: 60px; height: 60px; 
-                        border-radius: 50%; display: flex; align-items: center; 
-                        justify-content: center; margin: 0 auto; font-size: 1.5rem;'>
-            1
-            </div>
-            <h4>Cámara Existente</h4>
-            <p>Usa tu equipo actual</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    
-    with col2:
-        st.markdown(
-            """
-            <div style='text-align: center;'>
-            <div style='background-color: #4A6FA5; color: white; width: 60px; height: 60px; 
-                        border-radius: 50%; display: flex; align-items: center; 
-                        justify-content: center; margin: 0 auto; font-size: 1.5rem;'>
-            2
-            </div>
-            <h4>Análisis IA</h4>
-            <p>Detección en tiempo real</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    
-    with col3:
-        st.markdown(
-            """
-            <div style='text-align: center;'>
-            <div style='background-color: #4A6FA5; color: white; width: 60px; height: 60px; 
-                        border-radius: 50%; display: flex; align-items: center; 
-                        justify-content: center; margin: 0 auto; font-size: 1.5rem;'>
-            3
-            </div>
-            <h4>Alerta Instantánea</h4>
-            <p>Notificación al supervisor</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    
-    with col4:
-        st.markdown(
-            """
-            <div style='text-align: center;'>
-            <div style='background-color: #4A6FA5; color: white; width: 60px; height: 60px; 
-                        border-radius: 50%; display= flex; align-items: center; 
-                        justify-content: center; margin: 0 auto; font-size: 1.5rem;'>
-            4
-            </div>
-            <h4>Respuesta Rápida</h4>
-            <p>Acción inmediata</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    
-    # Flechas entre pasos (simuladas con HTML)
-    st.markdown(
-        """
-        <div style='display: flex; justify-content: space-between; padding: 0 40px; margin-top: -20px;'>
-        <div style='font-size: 1.5rem;'>→</div>
-        <div style='font-size: 1.5rem;'>→</div>
-        <div style='font-size: 1.5rem;'>→</div>
+        """, unsafe_allow_html=True)
+
+    with c2:
+        st.markdown("""
+        <div class="custom-card" style="text-align: center;">
+            <div class="step-circle">2</div>
+            <h4 style="color:#000080;">The Brain</h4>
+            <p style="font-size: 0.9rem;"><b>Lógica</b><br>Analiza vectores y ángulos geométricos para identificar caídas.</p>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+        """, unsafe_allow_html=True)
 
-# ============================================
-# PÁGINA: BENEFICIOS
-# ============================================
-
-elif page == "✨ Beneficios":
-    
-    st.title("✨ Beneficios que tu Empresa Sí Entiende")
-    
-    # Beneficios en tarjetas
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown(card_component(
-            "💰 Reduce Costos",
-            "Menos accidentes graves → baja costos médicos y reclamaciones legales. Inversión que se recupera rápidamente.",
-            "💰"
-        ), unsafe_allow_html=True)
-        
-        st.markdown(card_component(
-            "⚡ Respuesta Inmediata",
-            "El personal actúa más rápido y salva situaciones antes de que empeoren. Cada segundo cuenta.",
-            "⚡"
-        ), unsafe_allow_html=True)
-        
-        st.markdown(card_component(
-            "🔧 Sin Hardware Nuevo",
-            "Usa las cámaras que ya tienes. No necesitas comprar equipos especializados ni llenar el lugar de sensores.",
-            "🔧"
-        ), unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown(card_component(
-            "👨‍💻 Fácil de Usar",
-            "Panel sencillo e intuitivo, sin entrenamientos complicados. Tus empleados lo dominarán en minutos.",
-            "👨‍💻"
-        ), unsafe_allow_html=True)
-        
-        st.markdown(card_component(
-            "🔒 Privado y Seguro",
-            "Todo el análisis se realiza localmente; solo se envían alertas. Tus videos nunca salen de tus instalaciones.",
-            "🔒"
-        ), unsafe_allow_html=True)
-        
-        st.markdown(card_component(
-            "🌙 Operación 24/7",
-            "Nunca se cansa, nunca se distrae. Monitoreo constante día y noche, fines de semana y festivos.",
-            "🌙"
-        ), unsafe_allow_html=True)
-    
-    # Casos de uso
-    st.markdown("---")
-    st.markdown("### 🏥 Casos de Uso Ideales")
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.markdown(
-            """
-            <div style='background-color: #FFFFF; padding: 20px; border-radius: 10px; height: 150px;'>
-            <h4 style='color: #ffde59;'>🏥 Hospitales y Clínicas</h4>
-            <p>Monitoreo de pacientes en habitaciones y áreas comunes</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    
-    with col2:
-        st.markdown(
-            """
-            <div style='background-color: #FFFFF; padding: 20px; border-radius: 10px; height: 150px;'>
-            <h4 style='color: #ffde59;'>👵 Residencias de Ancianos</h4>
-            <p>Protección de adultos mayores en sus actividades diarias</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    
-    with col3:
-        st.markdown(
-            """
-            <div style='background-color: #FFFFf; padding: 20px; border-radius: 10px; height: 150px;'>
-            <h4 style='color: #ffde59;'>🏭 Fábricas y Almacenes</h4>
-            <p>Seguridad de trabajadores en áreas de riesgo</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    
-    # Espacio para imagen de beneficios
-    st.markdown("---")
-    col1, col2 = st.columns([1, 2])
-    
-    with col1:
-        st.markdown(
-            """
-            <div style='background-color: #f8f9fa; 
-                        padding: 20px; 
-                        border-radius: 15px;
-                        text-align: center;
-                        height: 250px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        border: 2px dashed #27ae60;'>
-            <p style='color: #27ae60;'>📈 Espacio para gráfico de beneficios</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    
-    with col2:
-        st.markdown(
-            """
-            <div style='background-color: #f8f9fa; 
-                        padding: 20px; 
-                        border-radius: 15px;
-                        text-align: center;
-                        height: 250px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        border: 2px dashed #27ae60;'>
-            <p style='color: #27ae60;'>🏢 Espacio para imagen de instalación</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-# ============================================
-# PÁGINA: CÓMO FUNCIONA
-# ============================================
-
-elif page == "📱 Cómo Funciona":
-    
-    st.title("📱 Cómo Funciona AInomaly")
-    
-    # Explicación técnica simplificada
-    st.markdown(
-        """
-        <div style='background-color: #2C3E50; color: white; padding: 30px; border-radius: 15px;'>
-        <h3 style='color: white;'>🎯 Simple en 3 Pasos</h3>
-        <ol style='font-size: 1.1rem;'>
-        <li><strong>Conecta</strong>: Vincula AInomaly con tus cámaras existentes (RTSP, IP, o archivos)</li>
-        <li><strong>Configura</strong>: Define zonas de monitoreo y tipos de alertas que necesitas</li>
-        <li><strong>Protege</strong>: Recibe alertas instantáneas y monitorea desde cualquier lugar</li>
-        </ol>
+    with c3:
+        st.markdown("""
+        <div class="custom-card" style="text-align: center;">
+            <div class="step-circle">3</div>
+            <h4 style="color:#000080;">The Messenger</h4>
+            <p style="font-size: 0.9rem;"><b>IoT</b><br>Envía notificaciones push con evidencia vía Telegram.</p>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+        """, unsafe_allow_html=True)
+
+    with c4:
+        st.markdown("""
+        <div class="custom-card" style="text-align: center;">
+            <div class="step-circle">4</div>
+            <h4 style="color:#000080;">The Face</h4>
+            <p style="font-size: 0.9rem;"><b>Interfaz</b><br>Dashboard interactivo en Streamlit (¡Esta App!).</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+# --- PÁGINA: CARACTERÍSTICAS (Grid) ---
+elif page == "✨ Características":
+    st.header("Características que Salvan Vidas")
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # Primera Fila
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.markdown("""
+        <div class="custom-card">
+            <div class="icon-box">📷</div>
+            <h4>Cámara Estándar</h4>
+            <p style="font-size:0.9rem;">No requiere sensores especiales. Convierte cualquier cámara web o IP.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with c2:
+        st.markdown("""
+        <div class="custom-card">
+            <div class="icon-box">👁️</div>
+            <h4>Visión Computarizada</h4>
+            <p style="font-size:0.9rem;">Análisis de esqueleto completo para entender la postura humana.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with c3:
+        st.markdown("""
+        <div class="custom-card">
+            <div class="icon-box">📐</div>
+            <h4>Heurística</h4>
+            <p style="font-size:0.9rem;">Matemática vectorial para diferenciar una caída de agacharse.</p>
+        </div>
+        """, unsafe_allow_html=True)
     
-    # Demostración simulada
-    st.markdown("---")
-    st.markdown("### 🎬 Demostración Interactiva")
+    st.markdown("<br>", unsafe_allow_html=True)
     
-    col1, col2 = st.columns(2)
+    # Segunda Fila
+    c4, c5, c6 = st.columns(3)
+    with c4:
+        st.markdown("""
+        <div class="custom-card">
+            <div class="icon-box">🔒</div>
+            <h4>Privacidad</h4>
+            <p style="font-size:0.9rem;">Procesamiento local. Tus imágenes no van a la nube de terceros.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with c5:
+        st.markdown("""
+        <div class="custom-card">
+            <div class="icon-box">📲</div>
+            <h4>Telegram Bot</h4>
+            <p style="font-size:0.9rem;">Alertas instantáneas en tu bolsillo con foto del evento.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with c6:
+        st.markdown("""
+        <div class="custom-card">
+            <div class="icon-box">⏱️</div>
+            <h4>Tiempo Real</h4>
+            <p style="font-size:0.9rem;">Sin latencia perceptible. Detección en milisegundos.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+# --- PÁGINA: DEMO INTERACTIVA (Funcionalidad Python original) ---
+elif page == "📱 Demo Interactiva":
+    st.title("📱 Prueba de Concepto")
+    st.markdown("Interactúa con el sistema como si fueras un operador.")
     
-    with col1:
-        # Selector de escenarios
+    col_demo1, col_demo2 = st.columns([1, 2])
+    
+    with col_demo1:
+        st.markdown("### Panel de Control")
+        st.markdown("""<div class="custom-card">""", unsafe_allow_html=True)
+        
         escenario = st.selectbox(
-            "Selecciona un escenario de prueba:",
-            ["Caída en pasillo", "Persona inconsciente", "Movimiento inusual", "Accidente laboral"]
+            "Seleccionar Escenario Simulado:",
+            ["Caída en pasillo", "Desmayo repentino", "Movimiento inusual", "Normal"]
         )
         
-        # Botón de simulación
-        if st.button("🚨 Simular Detección", use_container_width=True):
-            st.success(f"✅ AInomaly ha detectado: {escenario}")
-            st.info("📱 Alerta enviada al supervisor: 'Posible emergencia detectada en Zona A'")
+        sensibilidad = st.slider("Sensibilidad de Detección", 0, 100, 75)
         
-        # Configuración simulada
-        st.markdown("---")
-        st.markdown("#### ⚙️ Configuración")
+        notif_on = st.toggle("Activar Notificaciones", value=True)
         
-        zonas = st.multiselect(
-            "Zonas a monitorear:",
-            ["Entrada principal", "Pasillos", "Área común", "Habitaciones", "Cocina", "Baños"]
-        )
+        if st.button("🚨 EJECUTAR SIMULACIÓN"):
+            if escenario == "Normal":
+                 st.success("✅ Sistema estable. Sin anomalías.")
+            else:
+                st.error(f"⚠️ ¡ALERTA! {escenario} detectado.")
+                if notif_on:
+                    st.toast(f"Mensaje enviado a Supervisor: {escenario}", icon="📲")
         
-        sensibilidad = st.slider("Sensibilidad de detección:", 1, 10, 7)
-        
-        if st.button("💾 Guardar Configuración", use_container_width=True):
-            st.success("Configuración guardada exitosamente")
-    
-    with col2:
-        # Área de visualización simulada
-        st.markdown(
-            """
-            <div style='background-color: #000; 
-                        padding: 20px; 
-                        border-radius: 10px;
-                        text-align: center;
-                        height: 350px;
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        justify-content: center;
-                        color: white;
-                        position: relative;'>
-            <div style='position: absolute; top: 20px; left: 20px; background-color: red; color: white; padding: 5px 10px; border-radius: 5px;'>
-            EN VIVO
-            </div>
-            <p style='font-size: 1.2rem;'>🔴 Cámara 1 - Área Común</p>
-            <div style='background-color: #333; width: 80%; height: 200px; border-radius: 5px; display: flex; align-items: center; justify-content: center; margin: 20px 0;'>
-            <p>Vista previa de video en tiempo real</p>
-            </div>
-            <p>Estado: <span style='color: #2ecc71;'>● Monitoreando</span></p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        
-        # Métricas simuladas
-        col_met1, col_met2, col_met3 = st.columns(3)
-        with col_met1:
-            st.metric("Cámaras activas", "4", "+0")
-        with col_met2:
-            st.metric("Alertas hoy", "2", "-60%")
-        with col_met3:
-            st.metric("Tiempo respuesta", "45s", "-85%")
+        st.markdown("</div>", unsafe_allow_html=True)
 
-# ============================================
-# PÁGINA: CONTACTO
-# ============================================
+    with col_demo2:
+        st.markdown("### Visualización en Vivo")
+        # Simulación de ventana de video
+        st.markdown("""
+        <div style="background-color: black; width: 100%; height: 400px; border-radius: 10px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+            <p style="color: white;">[Video Feed Stream]</p>
+            <div style="position: absolute; top: 15px; left: 15px; background: red; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; animation: pulse 2s infinite;">🔴 EN VIVO</div>
+            <div style="position: absolute; bottom: 15px; left: 15px; color: #00ff00; font-family: monospace;">FPS: 30 | LATENCY: 12ms</div>
+            <div style="position: absolute; width: 100%; height: 100%; background: linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px) 0 0 / 50px 50px, linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px) 0 0 / 50px 50px;"></div>
+        </div>
+        """, unsafe_allow_html=True)
 
+# --- PÁGINA: CONTACTO ---
 elif page == "📞 Contacto":
+    st.header("Comienza a Proteger lo que Más Importa")
     
-    st.title("📞 Contáctanos")
+    c1, c2 = st.columns(2)
     
-    col1, col2 = st.columns(2)
+    with c1:
+        st.markdown("""
+        <div class="custom-card">
+            <h3>Contáctanos</h3>
+            <p>Agenda una demostración personalizada.</p>
+            <br>
+            <p>📧 <b>Email:</b> contacto@alnomaly.com</p>
+            <p>📞 <b>Tel:</b> +1 (800) 123-4567</p>
+            <p>🏢 <b>Oficinas:</b> Ciudad Tecnológica, Edificio AI</p>
+        </div>
+        """, unsafe_allow_html=True)
     
-    with col1:
-        st.markdown(
-            """
-            <div style='background-color: #E8F4F8; padding: 30px; border-radius: 15px; height: 100%;'>
-            <h3 style='color: #2C3E50;'>💬 ¿Listo para transformar tu seguridad?</h3>
-            <p style='font-size: 1.1rem;'>
-            AInomaly está listo para proteger a tus personas más vulnerables. 
-            Agenda una demostración personalizada y descubre cómo podemos adaptar 
-            la solución a tus necesidades específicas.
-            </p>
-            <hr>
-            <h4>📧 Email</h4>
-            <p>contacto@ainomaly.com</p>
-            <h4>📞 Teléfono</h4>
-            <p>+1 (800) 123-4567</p>
-            <h4>🏢 Dirección</h4>
-            <p>Av. Tecnología 123, Ciudad Digital</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    
-    with col2:
-        # Formulario de contacto
-        st.markdown("### ✉️ Solicita una Demostración")
-        
+    with c2:
         with st.form("contact_form"):
-            nombre = st.text_input("Nombre completo*")
-            empresa = st.text_input("Empresa*")
-            email = st.text_input("Email*")
-            telefono = st.text_input("Teléfono")
+            st.markdown("### Envíanos un mensaje")
+            nombre = st.text_input("Nombre")
+            email = st.text_input("Correo Electrónico")
+            mensaje = st.text_area("Mensaje")
             
-            tipo_empresa = st.selectbox(
-                "Tipo de empresa*",
-                ["Selecciona...", "Hospital/Clínica", "Residencia de ancianos", 
-                "Fábrica/Almacén", "Oficinas", "Otro"]
-            )
-            
-            num_camaras = st.slider("Número aproximado de cámaras", 1, 100, 10)
-            
-            mensaje = st.text_area("¿Algo específico que quieras mencionar?", height=100)
-            
-            submitted = st.form_submit_button("📩 Enviar Solicitud", use_container_width=True)
-            
-            if submitted:
-                if nombre and empresa and email and tipo_empresa != "Selecciona...":
-                    st.success("✅ Solicitud enviada. Nos contactaremos en menos de 24 horas.")
-                    st.balloons()
-                else:
-                    st.error("⚠️ Por favor completa los campos obligatorios (*)")
-    
-    # Testimonios (simulados)
-    st.markdown("---")
-    st.markdown("### 🌟 Lo que Dicen Nuestros Clientes")
-    
-    col_test1, col_test2, col_test3 = st.columns(3)
-    
-    with col_test1:
-        st.markdown(
-            """
-            <div style='background-color: black; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);'>
-            <p style='font-style: italic;'>"AInomaly detectó una caída en nuestra residencia y pudimos responder en 2 minutos. Salvó una vida."</p>
-            <p><strong>María González</strong><br>Directora, Residencia La Paz</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    
-    with col_test2:
-        st.markdown(
-            """
-            <div style='background-color: black; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);'>
-            <p style='font-style: italic;'>"La instalación fue sencilla y en una semana ya estábamos monitoreando. La reducción en costos de seguros ha sido notable."</p>
-            <p><strong>Roberto Martínez</strong><br>Gerente, Almacenes Centrales</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    
-    with col_test3:
-        st.markdown(
-            """
-            <div style='background-color: black; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);'>
-            <p style='font-style: italic;'>"La tranquilidad que da saber que tenemos este sistema es invaluable. Nuestros pacientes y sus familias están más seguros."</p>
-            <p><strong>Dr. Carlos Ruiz</strong><br>Director Médico, Clínica Santa María</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+            submit = st.form_submit_button("Enviar Mensaje")
+            if submit:
+                st.success("¡Gracias! Tu mensaje ha sido enviado.")
 
 # ============================================
-# PIE DE PÁGINA
+# 5. FOOTER
 # ============================================
-
-
-st.markdown("---")
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.markdown(
-        """
-        <div style='text-align: center;'>
-        <h5> AInomaly</h5>
-        <p>Tu guardián digital inteligente</p>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-with col2:
-    st.markdown(
-        """
-        <div style='text-align: center;'>
-        <p><strong>Transformando seguridad</strong><br>
-        Una cámara a la vez</p>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-with col3:
-    st.markdown(
-        """
-        <div style='text-align: center;'>
-        <p>© 2024 AInomaly Technologies</p>
-        <p>Todos los derechos reservados</p>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-# Nota final
-st.markdown(
-    """
-    <div style='text-align: center; margin-top: 20px; font-size: 0.8rem; color: #7f8c8d;'>
-    <p>AInomaly está diseñado para aumentar la seguridad y bienestar. No reemplaza la supervisión humana directa cuando sea requerida.</p>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+st.markdown("<br><br><br>", unsafe_allow_html=True)
+st.markdown("""
+<div style="background-color: #000080; color: white; padding: 3rem; text-align: center; border-radius: 1rem 1rem 0 0;">
+    <h3>Alnomaly</h3>
+    <p style="color: #BFDBFE;">Tu guardián digital inteligente</p>
+    <br>
+    <p style="font-size: 0.8rem; opacity: 0.7;">© 2025 Alnomaly Technologies. Todos los derechos reservados.</p>
+</div>
+""", unsafe_allow_html=True)
