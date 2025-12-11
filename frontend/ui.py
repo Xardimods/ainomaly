@@ -64,7 +64,7 @@ def card_component(title, content, icon=None):
 
 # Barra lateral para navegación
 with st.sidebar:
-    st.image(r"C:\Users\user\Downloads\AInomaly_Frontend\Logo_AInomaly.png", width=80)
+    st.image(r"frontend/Logo_AInomaly.png", width=80)
     st.title("🛡️ AInomaly")
     st.markdown("---")
     
