@@ -304,12 +304,7 @@ with d1:
         else:
             st.success("Estado Normal.")
 with d2:
-    st.markdown("""
-    <div style="background: black; height: 350px; border-radius: 10px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
-        <div style="position: absolute; top: 15px; left: 15px; background: red; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; animation: pulse 2s infinite;">🔴 EN VIVO</div>
-        <p style="color: white; text-align: center;">📹 Feed de Video<br><span style="color:#00ff00; font-family:monospace;">Analizando...</span></p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.video("video_demo.mp4")  
 st.markdown("</div>", unsafe_allow_html=True)
 
 # --- CONTACTO ---
