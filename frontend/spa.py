@@ -5,7 +5,7 @@ import base64
 # 1. CONFIGURACIÓN DE PÁGINA
 # ============================================
 st.set_page_config(
-    page_title="Alnomaly - Guardián Digital",
+    page_title="AInomaly - Guardián Digital",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -163,7 +163,7 @@ st.markdown(f"""
 # ============================================
 st.markdown("""
 <nav class="navbar">
-    <a href="#inicio" class="nav-logo">🛡️ Alnomaly</a>
+    <a href="#inicio" class="nav-logo"> AInomaly</a>
     <div class="nav-links">
         <a href="#inicio" class="nav-link">Inicio</a>
         <a href="#diferencia" class="nav-link">Tecnología</a>
@@ -186,15 +186,15 @@ col1, col2 = st.columns([1.2, 1])
 with col1:
     st.markdown("""
     <div style="background-color: #FEF9C3; color: #854D0E; padding: 5px 12px; border-radius: 20px; display: inline-block; font-size: 0.8rem; font-weight: 600; margin-bottom: 1rem;">
-        🛡️ Tecnología de Detección Avanzada
+    Tecnología de Detección Avanzada
     </div>
     """, unsafe_allow_html=True)
-    st.title("Alnomaly")
+    st.title("AInomaly")
     st.markdown("<h2 style='font-size: 2rem; margin-top: -10px;'>Detector Inteligente de Anomalías</h2>", unsafe_allow_html=True)
     st.markdown("""
     <p style="font-size: 1.25rem; font-style: italic; margin-top: 1rem;">"Donde otros ven video, nosotros vemos riesgos."</p>
     <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 2rem;">
-        Transforma una cámara estándar en un sensor inteligente. Utilizando visión por computadora y heurística geométrica, Alnomaly detecta caídas en tiempo real.
+        Transforma una cámara estándar en un sensor inteligente. Utilizando visión por computadora y heurística geométrica, AInomaly detecta caídas en tiempo real.
     </p>
     """, unsafe_allow_html=True)
     
@@ -217,7 +217,7 @@ st.markdown("""
 
 # --- DIFERENCIADORES ---
 st.markdown('<div id="diferencia" class="section-divider"></div>', unsafe_allow_html=True)
-st.markdown("<h2 style='text-align: center;'>Por qué Alnomaly es Diferente</h2>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align: center;'>Por qué AInomaly es Diferente?</h2>", unsafe_allow_html=True)
 st.markdown("<br>", unsafe_allow_html=True)
 
 col_diff1, col_diff2, col_diff3, col_diff4 = st.columns(4)
@@ -237,13 +237,12 @@ st.markdown("<h2>Soluciones para Cada Necesidad</h2><hr>", unsafe_allow_html=Tru
 # Sector 1
 s1, s2 = st.columns([1, 1])
 with s1:
-    st.markdown('<div style="background:#FEF9C3; color:#854D0E; padding:4px 10px; border-radius:4px; display:inline-block; font-weight:bold; font-size:0.8rem; margin-bottom:10px;">SECTOR</div>', unsafe_allow_html=True)
     st.subheader("Industria Manufacturera")
     st.markdown("""
     Protección para trabajadores en plantas y almacenes.
-    * ✅ Reduce accidentes laborales
-    * ✅ Cumplimiento normativo
-    * ✅ Monitoreo masivo
+    *  Reduce accidentes laborales
+    *  Cumplimiento normativo
+    *  Monitoreo masivo
     """)
 with s2:
     st.markdown('<div class="img-industry"></div>', unsafe_allow_html=True)
@@ -255,13 +254,12 @@ s3, s4 = st.columns([1, 1])
 with s3:
     st.markdown('<div class="img-home"></div>', unsafe_allow_html=True)
 with s4:
-    st.markdown('<div style="background:#FEF9C3; color:#854D0E; padding:4px 10px; border-radius:4px; display:inline-block; font-weight:bold; font-size:0.8rem; margin-bottom:10px;">SECTOR</div>', unsafe_allow_html=True)
     st.subheader("Cuidado en el Hogar")
     st.markdown("""
     Seguridad para adultos mayores que viven solos.
-    * ✅ Tranquilidad familiar
-    * ✅ Independencia sin vigilancia invasiva
-    * ✅ Evidencia solo ante incidentes
+    *  Tranquilidad familiar
+    *  Independencia sin vigilancia invasiva
+    *  Evidencia solo ante incidentes
     """)
 
 # --- ARQUITECTURA ---
@@ -270,10 +268,10 @@ st.markdown("<h2 style='text-align: center;'>Arquitectura del Sistema</h2><br>",
 
 a1, a2, a3, a4 = st.columns(4)
 steps = [
-    ("1", "The Eye", "Visión", "Captura video y extrae esqueletos (MediaPipe)."),
+    ("1", "The Eye", "Visión", "Captura video y extrae ecoordenadas."),
     ("2", "The Brain", "Lógica", "Analiza vectores y ángulos de caída."),
     ("3", "The Messenger", "IoT", "Envía alertas push al móvil (Telegram)."),
-    ("4", "The Face", "Interfaz", "Dashboard de monitoreo (Streamlit).")
+    ("4", "The Face", "Interfaz", "Dashboard de monitoreo.")
 ]
 
 for col, (num, title, subt, desc) in zip([a1, a2, a3, a4], steps):
@@ -290,7 +288,7 @@ for col, (num, title, subt, desc) in zip([a1, a2, a3, a4], steps):
 st.markdown('<div id="demo" class="section-divider"></div>', unsafe_allow_html=True)
 st.markdown("""
 <div style="background-color: #f8fafc; padding: 2rem; border-radius: 1rem; border: 1px dashed #cbd5e1;">
-<h2 style="text-align: center;">📱 Demo Interactiva</h2>
+<h2 style="text-align: center;"> Demo Interactiva</h5>
 <p style="text-align: center;">Simula el comportamiento del sistema.</p>
 <br>
 """, unsafe_allow_html=True)
@@ -326,7 +324,7 @@ with c1:
         <p style="color:white;">¿Tienes cámaras instaladas? Podemos integrarnos.</p>
         <br>
         <ul style="list-style: none; padding: 0;">
-            <li style="margin-bottom: 10px; color:white;">📧 contacto@alnomaly.com</li>
+            <li style="margin-bottom: 10px; color:white;">📧 contacto@ainomaly.com</li>
             <li style="margin-bottom: 10px; color:white;">📞 +1 (800) 123-4567</li>
         </ul>
     </div>
@@ -343,8 +341,8 @@ with c2:
 st.markdown("<br><br>", unsafe_allow_html=True)
 st.markdown("""
 <div style="background: #000080; color: white; padding: 4rem 2rem; text-align: center;">
-    <h3 style="color: white !important;">Alnomaly</h3>
+    <h3 style="color: white !important;">AInomaly</h3>
     <p style="color: #BFDBFE;">Inteligencia Artificial que cuida vidas.</p>
-    <p style="font-size: 0.8rem; opacity: 0.6; color: #BFDBFE;">© 2025 Alnomaly Technologies.</p>
+    <p style="font-size: 0.8rem; opacity: 0.6; color: #BFDBFE;">© 2025 AInomaly Technologies.</p>
 </div>
 """, unsafe_allow_html=True)
