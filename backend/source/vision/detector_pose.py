@@ -9,7 +9,7 @@ mp_drawing = mp.solutions.drawing_utils
 detector = FallDetector()
 url = "rtsp://admin:123456@192.168.100.61:554/stream1"
 
-cap = cv2.VideoCapture(url)
+cap = cv2.VideoCapture(1)
 
 with mp_pose.Pose(
         model_complexity=1,
