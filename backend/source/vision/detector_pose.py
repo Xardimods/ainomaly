@@ -13,13 +13,14 @@ cap = cv2.VideoCapture(url)
 
 with mp_pose.Pose(
         model_complexity=1,
-        min_detection_confidence=0.6,
-        min_tracking_confidence=0.6) as pose:
+        min_detection_confidence=0.5,
+        min_tracking_confidence=0.5) as pose:
 
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
             break
+
 
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = pose.process(img)
@@ -39,6 +40,8 @@ with mp_pose.Pose(
                 "right_hip": p(mp_pose.PoseLandmark.RIGHT_HIP),
                 "left_knee": p(mp_pose.PoseLandmark.LEFT_KNEE),
                 "right_knee": p(mp_pose.PoseLandmark.RIGHT_KNEE),
+                "left_ankle": p(mp_pose.PoseLandmark.LEFT_ANKLE),
+                "right_ankle": p(mp_pose.PoseLandmark.RIGHT_ANKLE)
             }
 
             posture, event = detector.classify_posture(coords)
@@ -57,12 +60,14 @@ with mp_pose.Pose(
             color = (0, 255, 0)
         elif posture == "Sentado":
             color = (0, 255, 255)
-        elif posture == "Caído":
+        elif posture == "Caido":
             color = (0, 0, 255)
+        elif posture == "Agachado":
+            color = (255, 0, 0)
         else:
             color = (200, 200, 200)
 
-        cv2.putText(frame, posture, (30, 60),
+        cv2.putText(frame, posture, (30, 100),
                     cv2.FONT_HERSHEY_SIMPLEX, 1.4, color, 3)
 
         cv2.imshow("Detector", frame)
