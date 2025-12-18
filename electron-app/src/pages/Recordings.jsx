@@ -12,8 +12,35 @@ const Recordings = () => {
             .catch(err => console.error("Failed to fetch recordings", err));
     }, []);
 
+    const [selectedVideo, setSelectedVideo] = useState(null);
+
     return (
-        <div className="space-y-6 animate-in fade-in duration-500">
+        <div className="space-y-6 animate-in fade-in duration-500 relative">
+            {/* Video Modal */}
+            {selectedVideo && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="bg-slate-900 rounded-2xl border border-white/10 w-full max-w-4xl overflow-hidden shadow-2xl relative">
+                        <div className="p-4 border-b border-white/5 flex justify-between items-center bg-black/20">
+                            <h3 className="font-medium text-white">{selectedVideo}</h3>
+                            <button
+                                onClick={() => setSelectedVideo(null)}
+                                className="text-slate-400 hover:text-white transition-colors"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        <div className="aspect-video bg-black relative">
+                            <video
+                                src={`http://127.0.0.1:8001/recordings_files/${selectedVideo}`}
+                                controls
+                                autoPlay
+                                className="w-full h-full"
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <header>
                 <h2 className="text-3xl font-bold text-white mb-2 tracking-tight">Grabaciones</h2>
                 <p className="text-slate-400">Gestiona el historial de grabaciones de seguridad.</p>
@@ -43,7 +70,11 @@ const Recordings = () => {
                                     <td className="p-4 text-slate-400">25 MB</td>
                                     <td className="p-4 text-right">
                                         <div className="flex justify-end gap-2">
-                                            <button className="p-2 hover:bg-emerald-500/20 rounded-lg text-emerald-400 transition-colors" title="Reproducir">
+                                            <button
+                                                onClick={() => setSelectedVideo(rec.name)}
+                                                className="p-2 hover:bg-emerald-500/20 rounded-lg text-emerald-400 transition-colors"
+                                                title="Reproducir"
+                                            >
                                                 <Play size={18} />
                                             </button>
                                             <button className="p-2 hover:bg-blue-500/20 rounded-lg text-blue-400 transition-colors" title="Descargar">
