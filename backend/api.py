@@ -67,6 +67,7 @@ def generate_frames(camera_id: str):
             
         # Create and start threaded stream manager
         stream = RTSPStream(src, name=f"Cam_{camera_id}")
+        
         stream.start()
         active_cameras[camera_id] = stream
     
@@ -96,11 +97,14 @@ def generate_frames(camera_id: str):
             time.sleep(1.0) # Slow update for placeholder
             continue
             
-        # Process frame with Vision System
+        # Process frame with Vision System (Throttled inside PoseService)
         if camera_id not in pose_services:
             pose_services[camera_id] = PoseService()
         
-        frame = pose_services[camera_id].process_frame(frame)
+        try:
+            frame = pose_services[camera_id].process_frame(frame)
+        except Exception as e:
+            print(f"Vision processing error: {e}")
             
         ret, buffer = cv2.imencode('.jpg', frame)
         frame_bytes = buffer.tobytes()
