@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Image, Trash2, Download, Search, Calendar, FileText, X } from 'lucide-react';
+import { useDialog } from '../context/DialogContext';
 
 const FilesPage = () => {
+    const { confirm, alert } = useDialog();
     const [files, setFiles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedImage, setSelectedImage] = useState(null);
@@ -20,9 +22,14 @@ const FilesPage = () => {
             });
     }, []);
 
-    const handleDelete = (filename, e) => {
+    const handleDelete = async (filename, e) => {
         if (e) e.stopPropagation();
-        if (!confirm("¿Estás seguro de eliminar este archivo?")) return;
+
+        const confirmed = await confirm("¿Estás seguro de eliminar este archivo?", {
+            variant: 'danger',
+            confirmText: 'Eliminar'
+        });
+        if (!confirmed) return;
 
         // If the file is currently open in the modal, close it first to avoid locks
         if (selectedImage?.name === filename) {
@@ -38,17 +45,17 @@ const FilesPage = () => {
                     return { error: `HTTP ${res.status} ${res.statusText}` };
                 }
             })
-            .then(data => {
+            .then(async data => {
                 if (data.status === 'deleted') {
                     setFiles(prev => prev.filter(f => f.name !== filename));
                 } else {
                     const msg = data.error || data.detail || "Error desconocido";
-                    alert("Error eliminando: " + msg);
+                    await alert("Error eliminando: " + msg, { variant: 'danger' });
                 }
             })
-            .catch(err => {
+            .catch(async err => {
                 console.error("Error deleting:", err);
-                alert("Error de conexión al eliminar.");
+                await alert("Error de conexión al eliminar.", { variant: 'danger' });
             });
     };
 
