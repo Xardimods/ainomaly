@@ -42,6 +42,15 @@ const Dashboard = () => {
     const [selectedAlert, setSelectedAlert] = useState(null);
     const navigate = useNavigate();
 
+    const translateEvent = (eventStr) => {
+        if (!eventStr) return "";
+        if (eventStr.includes("SIMULACRO") || eventStr.includes("SIMULATION")) return t("events.fall_sim");
+        if (eventStr.includes("Caída") || eventStr.includes("Fall")) return t("events.fall");
+        if (eventStr.includes("Recuperación") || eventStr.includes("Recovery")) return t("events.recovery");
+        if (eventStr.includes("Normal")) return t("events.normal");
+        return eventStr;
+    };
+
     useEffect(() => {
         const timer = setInterval(() => setDate(new Date()), 60000);
         return () => clearInterval(timer);
@@ -142,7 +151,7 @@ const Dashboard = () => {
                                             {alert.event.includes("Caída") ? <AlertTriangle size={20} /> : <Video size={20} />}
                                         </div>
                                         <div>
-                                            <p className="text-slate-900 dark:text-white font-medium">{alert.event}</p>
+                                            <p className="text-slate-900 dark:text-white font-medium">{translateEvent(alert.event)}</p>
                                             <p className="text-xs text-slate-500 dark:text-slate-400">{alert.camera} • {alert.date}</p>
                                         </div>
                                     </div>
@@ -218,7 +227,7 @@ const Dashboard = () => {
                                 <div>
                                     <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 transition-colors">
                                         {selectedAlert.event.includes("Caída") ? <AlertTriangle className="text-rose-500" /> : <Video className="text-indigo-500" />}
-                                        {selectedAlert.event}
+                                        {translateEvent(selectedAlert.event)}
                                     </h3>
                                     <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{selectedAlert.date} • {selectedAlert.camera}</p>
                                 </div>

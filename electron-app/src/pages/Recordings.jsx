@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Play, FileVideo, Download, Trash2 } from 'lucide-react';
+import { useDialog } from '../context/DialogContext';
 
 const Recordings = () => {
+    const { confirm, alert } = useDialog();
     const [recordings, setRecordings] = useState([]);
 
     useEffect(() => {
@@ -14,8 +16,12 @@ const Recordings = () => {
 
     const [selectedVideo, setSelectedVideo] = useState(null);
 
-    const handleDelete = (filename) => {
-        if (!confirm("¿Estás seguro de eliminar esta grabación?")) return;
+    const handleDelete = async (filename) => {
+        const confirmed = await confirm("¿Estás seguro de eliminar esta grabación?", {
+            variant: 'danger',
+            confirmText: "Eliminar"
+        });
+        if (!confirmed) return;
 
         // On Windows, playing a video locks the file. We must unmount the player first.
         const isPlaying = selectedVideo === filename;
@@ -34,17 +40,17 @@ const Recordings = () => {
                         return { error: `HTTP ${res.status} ${res.statusText}` };
                     }
                 })
-                .then(data => {
+                .then(async data => {
                     if (data.status === 'deleted') {
                         setRecordings(prev => prev.filter(r => r.name !== filename));
                     } else {
                         const msg = data.error || data.detail || "Error desconocido";
-                        alert("Error eliminando: " + msg);
+                        await alert("Error eliminando: " + msg, { variant: 'danger' });
                     }
                 })
-                .catch(err => {
+                .catch(async err => {
                     console.error("Error deleting:", err);
-                    alert("Error de conexión al eliminar.");
+                    await alert("Error de conexión al eliminar.", { variant: 'danger' });
                 });
         }, isPlaying ? 200 : 0);
     };
@@ -65,7 +71,7 @@ const Recordings = () => {
             document.body.removeChild(a);
         } catch (error) {
             console.error("Download failed:", error);
-            alert("Error al descargar el archivo. Verifique la conexión.");
+            await alert("Error al descargar el archivo. Verifique la conexión.", { variant: 'danger' });
         }
     };
 
