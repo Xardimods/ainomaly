@@ -1,18 +1,18 @@
-# Visión (The Eye)
-mediapipe
+# Vision (The Eye)
+ultralytics
 opencv-python
-streamlit
 
-# IoT y Comunicación (The Messenger)
-# Se sugiere 'requests' para enviar mensajes rápido como indica el consejo técnico #3
+# IoT & Communication
 python-telegram-bot
+requests
 
-# Configuración y Variables de Entorno (Seguridad)
+# Configuration
 python-dotenv
 
-# Visualización y Datos (Dashboard)
+# Backend & Data
 pandas
-plotly
 fastapi
 uvicorn
 python-multipart
+psutil
+pydantic
