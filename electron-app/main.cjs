@@ -5,16 +5,30 @@ const { spawn } = require('child_process');
 let backendProcess = null;
 
 const startBackend = () => {
-  // In CJS, __dirname is available directly
-  const rootDir = path.join(__dirname, '..');
-  console.log("Starting Python Backend from:", rootDir);
+  let scriptPath;
+  let cwd;
+
+  if (app.isPackaged) {
+    // In production, resources are unpacked in "resources" folder
+    cwd = process.resourcesPath;
+    scriptPath = path.join(process.resourcesPath, 'backend', 'api.py');
+  } else {
+    // In development, we are in electron-app/ folder
+    cwd = path.join(__dirname, '..');
+    scriptPath = 'backend/api.py';
+  }
+
+  console.log("Starting Python Backend from:", cwd);
+  console.log("Script:", scriptPath);
 
   // Spawn python process
-  // Assumes 'python' is in PATH. On some systems might be 'python3'
-  backendProcess = spawn('python', ['backend/api.py'], {
-    cwd: rootDir,
-    stdio: 'inherit', // Pipe output to console for debugging
-    shell: true       // fast way to ensure it runs in shell context if needed
+  // We assume 'python' is in the system PATH as per INSTALL.md requirements
+  const pythonCmd = 'python';
+
+  backendProcess = spawn(pythonCmd, [scriptPath], {
+    cwd: cwd,
+    stdio: 'inherit',
+    shell: true
   });
 
   backendProcess.on('error', (err) => {
@@ -30,8 +44,7 @@ const startBackend = () => {
 const killBackend = () => {
   if (backendProcess) {
     console.log("Killing backend process...");
-    // On Windows with shell:true, usually standard kill works for child processes attached to shell
-    // If not, we might need tree-kill, but keeping it simple for now.
+    // Force kill if necessary - simple kill is safer for now
     backendProcess.kill();
     backendProcess = null;
   }
@@ -48,7 +61,6 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
     },
-    // Dark theme frame
     backgroundColor: '#1a1a1a',
     titleBarStyle: 'hidden',
     titleBarOverlay: {
@@ -58,17 +70,12 @@ function createWindow() {
     }
   });
 
-  // In production, load the build file.
-  // In development, load the vite dev server url.
   const isDev = !app.isPackaged;
 
   if (isDev) {
     win.loadURL('http://localhost:5173');
-    // win.webContents.openDevTools();
   } else {
-    // win.loadFile(path.join(__dirname, 'dist/index.html'));
-    // For now we focus on dev mode
-    console.log("Production build not yet configured");
+    win.loadFile(path.join(__dirname, 'dist/index.html'));
   }
 }
 

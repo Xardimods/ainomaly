@@ -1,14 +1,15 @@
 {
   "name": "electron-app",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "main": "main.cjs",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "electron": "concurrently -k \"cross-env BROWSER=none npm run dev\" \"wait-on tcp:5173 && electron .\""
+    "electron": "concurrently -k \"cross-env BROWSER=none npm run dev\" \"wait-on tcp:5173 && electron .\"",
+    "dist": "vite build && electron-builder"
   },
   "dependencies": {
     "lucide-react": "^0.561.0",
@@ -26,6 +27,7 @@
     "concurrently": "^9.2.1",
     "cross-env": "^10.1.0",
     "electron": "^33.4.11",
+    "electron-builder": "^24.9.1",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
@@ -34,5 +36,38 @@
     "tailwindcss": "^4.1.18",
     "vite": "^7.2.4",
     "wait-on": "^9.0.3"
+  },
+  "build": {
+    "appId": "com.ainomaly.app",
+    "productName": "AInomaly",
+    "files": [
+      "dist/**/*",
+      "main.cjs",
+      "preload.cjs",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../backend",
+        "to": "backend",
+        "filter": [
+          "**/*",
+          "!**/__pycache__/**",
+          "!**/.venv/**",
+          "!**/.env"
+        ]
+      },
+      {
+        "from": "../requirements.txt",
+        "to": "."
+      }
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "public/favicon.ico"
+    }
   }
 }

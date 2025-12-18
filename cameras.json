@@ -30,5 +30,22 @@
             "password": "",
             "path": "/app-8F9K44lJ/304679fe_stream2"
         }
+    },
+    {
+        "id": "4",
+        "name": "ggj",
+        "source": "0",
+        "type": "webcam",
+        "enabled": false,
+        "config": {
+            "name": "ggj",
+            "type": "webcam",
+            "source": "0",
+            "ip": "",
+            "port": "554",
+            "user": "",
+            "password": "",
+            "path": "/stream"
+        }
     }
 ]
