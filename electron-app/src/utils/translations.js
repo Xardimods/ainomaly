@@ -27,6 +27,8 @@ export const translations = {
         "cam.add_camera": "Agregar Cámara",
         "cam.edit": "Editar",
         "cam.delete": "Eliminar",
+        "cam.delete_title": "Eliminar Cámara",
+        "cam.delete_yes": "Eliminar",
         "cam.delete_confirm": "¿Estás seguro de eliminar esta cámara?",
         "cam.form.name": "Nombre de la Cámara",
         "cam.form.type": "Tipo de Fuente",
@@ -111,7 +113,19 @@ export const translations = {
         "settings.sensitivity": "Sensibilidad de detección",
         "settings.autosave": "Guardar clips automáticamente",
         "settings.telegram_notify": "Enviar notificaciones a Telegram",
-        "settings.save": "Guardar Cambios"
+        "settings.save": "Guardar Cambios",
+
+        // Dialogs
+        "dialog.confirm.title": "Confirmar",
+        "dialog.confirm.yes": "Sí",
+        "dialog.confirm.cancel": "Cancelar",
+        "dialog.alert.title": "Alerta",
+
+        // Events (Backend Mapping)
+        "events.fall": "Caída Detectada",
+        "events.fall_sim": "Caída Detectada (SIMULACRO)",
+        "events.recovery": "Recuperación",
+        "events.normal": "Monitorización Activa"
     },
     en: {
         // Sidebar
@@ -141,6 +155,8 @@ export const translations = {
         "cam.add_camera": "Add Camera",
         "cam.edit": "Edit",
         "cam.delete": "Delete",
+        "cam.delete_title": "Delete Camera",
+        "cam.delete_yes": "Delete",
         "cam.delete_confirm": "Are you sure you want to delete this camera?",
         "cam.form.name": "Camera Name",
         "cam.form.type": "Source Type",
@@ -225,6 +241,18 @@ export const translations = {
         "settings.sensitivity": "Detection Sensitivity",
         "settings.autosave": "Auto-save clips",
         "settings.telegram_notify": "Send Telegram notifications",
-        "settings.save": "Save Changes"
+        "settings.save": "Save Changes",
+
+        // Dialogs
+        "dialog.confirm.title": "Confirmation",
+        "dialog.confirm.yes": "Yes",
+        "dialog.confirm.cancel": "Cancel",
+        "dialog.alert.title": "Alert",
+
+        // Events (Backend Mapping)
+        "events.fall": "Fall Detected",
+        "events.fall_sim": "Fall Detected (SIMULATION)",
+        "events.recovery": "Recovery",
+        "events.normal": "Active Monitoring"
     }
 };

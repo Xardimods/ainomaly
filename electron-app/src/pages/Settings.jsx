@@ -2,10 +2,12 @@ import React from 'react';
 import { Save } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useDialog } from '../context/DialogContext';
 
 const Settings = () => {
     const { theme, toggleTheme } = useTheme();
     const { language, setLanguage, t } = useLanguage();
+    const { alert } = useDialog();
 
     const [settings, setSettings] = React.useState({
         deviceName: "",
@@ -44,8 +46,8 @@ const Settings = () => {
             body: JSON.stringify(settings)
         })
             .then(res => res.json())
-            .then(() => alert(t("settings.save") + " OK"))
-            .catch(() => alert("Error"));
+            .then(async () => await alert(t("settings.save") + " OK", { variant: 'success' }))
+            .catch(async () => await alert("Error Saving Settings", { variant: 'danger' }));
     };
 
     if (loading) return <div className="text-slate-900 dark:text-white">Loading...</div>;

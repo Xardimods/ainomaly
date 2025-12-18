@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Bell, History, Settings, Send, Save, AlertTriangle, CheckCircle, Smartphone, X, Trash2 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { useDialog } from '../context/DialogContext';
 
 const AlertsPage = () => {
     const { t } = useLanguage();
+    const { confirm, alert } = useDialog();
     const location = useLocation();
     const [activeTab, setActiveTab] = useState(location.state?.tab || 'config'); // config, rules, history
     const [settings, setSettings] = useState({
@@ -23,6 +25,15 @@ const AlertsPage = () => {
     const [scanning, setScanning] = useState(false);
     const [discoveredUsers, setDiscoveredUsers] = useState([]);
     const [newChatId, setNewChatId] = useState("");
+
+    const translateEvent = (eventStr) => {
+        if (!eventStr) return "";
+        if (eventStr.includes("SIMULACRO") || eventStr.includes("SIMULATION")) return t("events.fall_sim");
+        if (eventStr.includes("Caída") || eventStr.includes("Fall")) return t("events.fall");
+        if (eventStr.includes("Recuperación") || eventStr.includes("Recovery")) return t("events.recovery");
+        if (eventStr.includes("Normal")) return t("events.normal");
+        return eventStr;
+    };
 
     const fetchSettings = () => {
         fetch('http://127.0.0.1:8001/alerts/settings')
@@ -114,8 +125,13 @@ const AlertsPage = () => {
             });
     };
 
-    const handleFullTest = () => {
-        if (!confirm(t("alerts.sim_confirm"))) return;
+    const handleFullTest = async () => {
+        const confirmed = await confirm(t("alerts.sim_confirm"), {
+            title: t("alerts.data.simulate") || "Simular Alerta",
+            confirmText: t("alerts.simulate") || "Simular",
+            variant: "warning"
+        });
+        if (!confirmed) return;
 
         setStatusMsg(t("alerts.sending"));
         fetch('http://127.0.0.1:8001/alerts/test_full', { method: 'POST' })
@@ -124,15 +140,19 @@ const AlertsPage = () => {
             .catch(() => setStatusMsg(t("alerts.error")));
     };
 
-    const handleDeleteAlert = (id) => {
-        if (!confirm(t("alerts.history_delete_confirm"))) return;
+    const handleDeleteAlert = async (id) => {
+        const confirmed = await confirm(t("alerts.history_delete_confirm"), {
+            variant: 'danger',
+            confirmText: 'Eliminar'
+        });
+        if (!confirmed) return;
 
         fetch(`http://127.0.0.1:8001/alerts/history/${id}`, { method: 'DELETE' })
-            .then(res => {
+            .then(async res => {
                 if (res.ok) {
                     setHistory(prev => prev.filter(item => item.id !== id));
                 } else {
-                    alert(t("alerts.error"));
+                    await alert(t("alerts.error"), { variant: 'danger' });
                 }
             })
             .catch(err => console.error(err));
@@ -439,7 +459,7 @@ const AlertsPage = () => {
                                                 <td className="p-4 text-slate-900 dark:text-white font-medium">{alert.camera}</td>
                                                 <td className="p-4">
                                                     <span className="px-2 py-1 rounded-md bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-bold border border-rose-500/20">
-                                                        {alert.event}
+                                                        {translateEvent(alert.event)}
                                                     </span>
                                                 </td>
                                                 <td className="p-4">
