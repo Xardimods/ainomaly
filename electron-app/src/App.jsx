@@ -70,27 +70,31 @@ const NotificationOverlay = () => {
 import { ThemeProvider } from './context/ThemeProvider';
 import { LanguageProvider } from './context/LanguageProvider';
 
+import { DialogProvider } from './context/DialogContext';
+
 function App() {
   return (
     <ThemeProvider>
       <LanguageProvider>
-        <Router>
-          <div className="flex h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-500">
-            <NotificationOverlay />
-            <Sidebar />
-            <main className="flex-1 overflow-auto p-8 relative">
-              <Routes>
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/cameras" element={<Cameras />} />
-                <Route path="/alerts" element={<AlertsPage />} />
-                <Route path="/media" element={<MediaPage />} />
+        <DialogProvider>
+          <Router>
+            <div className="flex h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-500">
+              <NotificationOverlay />
+              <Sidebar />
+              <main className="flex-1 overflow-auto p-8 relative">
+                <Routes>
+                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/cameras" element={<Cameras />} />
+                  <Route path="/alerts" element={<AlertsPage />} />
+                  <Route path="/media" element={<MediaPage />} />
 
-                <Route path="/settings" element={<Settings />} />
-              </Routes>
-            </main>
-          </div>
-        </Router>
+                  <Route path="/settings" element={<Settings />} />
+                </Routes>
+              </main>
+            </div>
+          </Router>
+        </DialogProvider>
       </LanguageProvider>
     </ThemeProvider>
   );

@@ -20,7 +20,7 @@
         "name": "prueba",
         "source": "rtsp://716f898c7b71.entrypoint.cloud.wowza.com:1935/app-8F9K44lJ/304679fe_stream2",
         "type": "rtsp",
-        "enabled": false,
+        "enabled": true,
         "config": {
             "name": "prueba",
             "type": "rtsp",
@@ -29,23 +29,6 @@
             "user": "",
             "password": "",
             "path": "/app-8F9K44lJ/304679fe_stream2"
-        }
-    },
-    {
-        "id": "4",
-        "name": "orueba",
-        "source": "0",
-        "type": "webcam",
-        "enabled": false,
-        "config": {
-            "name": "orueba",
-            "type": "webcam",
-            "source": "0",
-            "ip": "",
-            "port": "554",
-            "user": "",
-            "password": "",
-            "path": "/stream"
         }
     }
 ]

@@ -1,14 +1,5 @@
 [
     {
-        "date": "2025-12-18 15:30:16",
-        "camera": "C\u00e1mara 4",
-        "event": "Ca\u00edda detectada",
-        "status": "Enviado",
-        "details": "6889078618: OK",
-        "snapshot": "snapshots\\alert_4_1766086214.jpg",
-        "id": "b38635fc-2098-4bab-90f0-271f78fa823e"
-    },
-    {
         "date": "2025-12-18 15:36:30",
         "camera": "C\u00e1mara 4",
         "event": "Ca\u00edda detectada",

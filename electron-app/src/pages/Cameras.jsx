@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Camera, Trash2, Maximize2, X, Activity, Power } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { useDialog } from '../context/DialogContext';
 
 const CameraFeed = ({ cam }) => {
     // Unique timestamp for this mount instance to force stream refresh
@@ -25,6 +26,7 @@ const CameraFeed = ({ cam }) => {
 
 const Cameras = () => {
     const { t } = useLanguage();
+    const { confirm } = useDialog();
     const [cameras, setCameras] = useState([]);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [selectedCamera, setSelectedCamera] = useState(null);
@@ -82,9 +84,15 @@ const Cameras = () => {
             .then(() => fetchCameras());
     };
 
-    const handleAddCamera = () => {
+    const handleAddCamera = async () => {
         if (testStatus !== 'success') {
-            if (!confirm("La prueba de conexión no se realizó o falló. ¿Guardar de todos modos?")) return;
+            const confirmed = await confirm("La prueba de conexión no se realizó o falló. ¿Guardar de todos modos?", {
+                title: "Conexión Inestable",
+                variant: "warning",
+                confirmText: "Guardar",
+                cancelText: "Revisar"
+            });
+            if (!confirmed) return;
         }
 
         const newCamera = {
@@ -119,9 +127,14 @@ const Cameras = () => {
         setTestStatus(null);
     };
 
-    const handleDeleteCamera = (id, e) => {
+    const handleDeleteCamera = async (id, e) => {
         e.stopPropagation();
-        if (!confirm(t("cam.delete_confirm"))) return;
+        const confirmed = await confirm(t("cam.delete_confirm"), {
+            title: t("cam.delete_title") || "Eliminar Cámara",
+            variant: "danger",
+            confirmText: t("cam.delete_yes") || "Eliminar"
+        });
+        if (!confirmed) return;
 
         fetch(`http://127.0.0.1:8001/cameras/${id}`, { method: 'DELETE' })
             .then(() => fetchCameras());

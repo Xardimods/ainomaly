@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Image, Video, Trash2, Download, Search, FileVideo, Play, X, Grid, List } from 'lucide-react';
+import { useDialog } from '../context/DialogContext';
 import { useLanguage } from '../context/LanguageContext';
 
 const MediaPage = () => {
     const { t } = useLanguage();
+    const { confirm, alert } = useDialog();
     const [activeTab, setActiveTab] = useState('all'); // 'all', 'images', 'videos'
     const [mediaItems, setMediaItems] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -54,7 +56,12 @@ const MediaPage = () => {
 
     const handleDelete = async (item, e) => {
         if (e) e.stopPropagation();
-        if (!confirm(t("media.delete_confirm"))) return;
+
+        const confirmed = await confirm(t("media.delete_confirm"), {
+            variant: 'danger',
+            confirmText: t("media.delete") || "Eliminar"
+        });
+        if (!confirmed) return;
 
         // If the item is currently open, close it
         if (selectedItem?.name === item.name) {
@@ -87,11 +94,11 @@ const MediaPage = () => {
                 setMediaItems(prev => prev.filter(i => i.id !== item.id));
             } else {
                 const msg = result.error || result.detail || t("media.error_unknown");
-                alert(`${t("media.error_deleting")} ${msg}`);
+                await alert(`${t("media.error_deleting")} ${msg}`, { variant: 'danger' });
             }
         } catch (err) {
             console.error("Error deleting:", err);
-            alert(t("media.error_connection"));
+            await alert(t("media.error_connection"), { variant: 'danger' });
         }
     };
 
