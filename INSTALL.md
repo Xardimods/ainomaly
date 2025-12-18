@@ -1,26 +1,29 @@
-# 📦 Guía de Instalación
+# Guía de Instalación
 
 Sigue estos pasos para configurar y ejecutar la aplicación **AInomaly** en una nueva máquina.
 
 ## Prerrequisitos
 
 1.  **Python 3.10+**: [Descargar Aquí](https://www.python.org/downloads/)
-    *   *Nota: Asegúrate de marcar "Add Python to PATH" durante la instalación.*
+    - _Nota: Asegúrate de marcar "Add Python to PATH" durante la instalación._
 2.  **Node.js 18+**: [Descargar Aquí](https://nodejs.org/)
 
 ---
 
-## 🚀 Instalación Rápida
+## Instalación Rápida
 
 ### 1. Configurar Entorno Python
+
 Abre una terminal (CMD o PowerShell) en la carpeta raíz del proyecto e instala las librerías necesarias:
 
 ```bash
 pip install -r requirements.txt
 ```
-*Esto instalará `ultralytics` (YOLO), `fastapi`, `opencv-python` y otras dependencias.*
+
+_Esto instalará `ultralytics` (YOLO), `fastapi`, `opencv-python` y otras dependencias._
 
 ### 2. Configurar Entorno Frontend
+
 En la misma terminal, navega a la carpeta de la aplicación de escritorio e instala las dependencias de Node.js:
 
 ```bash
@@ -30,7 +33,7 @@ npm install
 
 ---
 
-## 🎮 Ejecución
+## Ejecución
 
 Para iniciar el sistema completo (La aplicación abrirá automáticamente el backend de Python):
 
@@ -41,16 +44,18 @@ npm run electron
 
 ---
 
-## 🛠️ Ejecución Manual (Modo Debug)
+## Ejecución Manual (Modo Debug)
 
 Si prefieres ejecutar los servicios por separado para ver los registros de error detallados:
 
 1.  **Terminal 1 (Backend):**
+
     ```bash
     # Desde la raíz del proyecto
     python backend/api.py
     ```
-    *Deberías ver `Uvicorn running on http://127.0.0.1:8001`*
+
+    _Deberías ver `Uvicorn running on http://127.0.0.1:8001`_
 
 2.  **Terminal 2 (Frontend):**
     ```bash
@@ -60,12 +65,12 @@ Si prefieres ejecutar los servicios por separado para ver los registros de error
 
 ---
 
-## ❓ Solución de Problemas
+## Solución de Problemas
 
--   **"Module not found" en Python**: Asegúrate de haber instalado los `requirements.txt` en el entorno correcto.
--   **Cámara no visible**: Verifica que ninguna otra aplicación (como Zoom o Teams) esté usando la webcam.
--   **Políticas de Seguridad (PowerShell)**: Si `npm run electron` falla con un error de permisos en Windows, intenta ejecutar:
-    ```cmd
-    cmd /c npm run electron
-    ```
--   **Modelo IA**: La primera vez que ejecutes el programa, se descargará automáticamente `yolov8n-pose.pt`. Si esto falla por conexión a internet, descárgalo manualmente y colócalo en `backend/models/`.
+- **"Module not found" en Python**: Asegúrate de haber instalado los `requirements.txt` en el entorno correcto.
+- **Cámara no visible**: Verifica que ninguna otra aplicación (como Zoom o Teams) esté usando la webcam.
+- **Políticas de Seguridad (PowerShell)**: Si `npm run electron` falla con un error de permisos en Windows, intenta ejecutar:
+  ```cmd
+  cmd /c npm run electron
+  ```
+- **Modelo IA**: La primera vez que ejecutes el programa, se descargará automáticamente `yolov8n-pose.pt`. Si esto falla por conexión a internet, descárgalo manualmente y colócalo en `backend/models/`.
