@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Image, Video, Trash2, Download, Search, FileVideo, Play, X, Grid, List } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 const MediaPage = () => {
+    const { t } = useLanguage();
     const [activeTab, setActiveTab] = useState('all'); // 'all', 'images', 'videos'
     const [mediaItems, setMediaItems] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -52,7 +54,7 @@ const MediaPage = () => {
 
     const handleDelete = async (item, e) => {
         if (e) e.stopPropagation();
-        if (!confirm(`¿Estás seguro de eliminar este archivo?`)) return;
+        if (!confirm(t("media.delete_confirm"))) return;
 
         // If the item is currently open, close it
         if (selectedItem?.name === item.name) {
@@ -84,12 +86,12 @@ const MediaPage = () => {
             if (result.status === 'deleted') {
                 setMediaItems(prev => prev.filter(i => i.id !== item.id));
             } else {
-                const msg = result.error || result.detail || "Error desconocido";
-                alert("Error eliminando: " + msg);
+                const msg = result.error || result.detail || t("media.error_unknown");
+                alert(`${t("media.error_deleting")} ${msg}`);
             }
         } catch (err) {
             console.error("Error deleting:", err);
-            alert("Error de conexión al eliminar.");
+            alert(t("media.error_connection"));
         }
     };
 
@@ -117,30 +119,30 @@ const MediaPage = () => {
         <div className="space-y-6 animate-in fade-in duration-500 max-w-7xl mx-auto h-full flex flex-col">
             <header className="flex flex-col md:flex-row justify-between items-end gap-4">
                 <div>
-                    <h2 className="text-3xl font-bold text-white mb-2 tracking-tight">Galería Multimedia</h2>
-                    <p className="text-slate-400">Gestiona tus grabaciones y capturas de seguridad.</p>
+                    <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight transition-colors">{t("media.title")}</h2>
+                    <p className="text-slate-500 dark:text-slate-400 transition-colors">{t("media.subtitle")}</p>
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
                     {/* Tabs */}
-                    <div className="flex bg-black/20 p-1 rounded-xl border border-white/10">
+                    <div className="flex bg-slate-100 dark:bg-black/20 p-1 rounded-xl border border-slate-200 dark:border-white/10 transition-colors">
                         <button
                             onClick={() => setActiveTab('all')}
-                            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'all' ? 'bg-white/10 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
+                            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'all' ? 'bg-white dark:bg-white/10 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
                         >
-                            Todos
+                            {t("media.tabs.all")}
                         </button>
                         <button
                             onClick={() => setActiveTab('videos')}
-                            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'videos' ? 'bg-indigo-500/20 text-indigo-300 shadow-sm' : 'text-slate-400 hover:text-white'}`}
+                            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'videos' ? 'bg-white dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
                         >
-                            <Video size={14} /> Videos
+                            <Video size={14} /> {t("media.tabs.videos")}
                         </button>
                         <button
                             onClick={() => setActiveTab('images')}
-                            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'images' ? 'bg-emerald-500/20 text-emerald-300 shadow-sm' : 'text-slate-400 hover:text-white'}`}
+                            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'images' ? 'bg-white dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
                         >
-                            <Image size={14} /> Fotos
+                            <Image size={14} /> {t("media.tabs.photos")}
                         </button>
                     </div>
 
@@ -149,10 +151,10 @@ const MediaPage = () => {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                         <input
                             type="text"
-                            placeholder="Buscar..."
+                            placeholder={t("media.search_placeholder")}
                             value={search}
                             onChange={e => setSearch(e.target.value)}
-                            className="bg-black/20 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-white focus:outline-none focus:border-blue-500 w-full md:w-64 text-sm"
+                            className="bg-white dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-2 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 w-full md:w-64 text-sm transition-colors"
                         />
                     </div>
                 </div>
@@ -170,7 +172,7 @@ const MediaPage = () => {
                                 <div
                                     key={item.id}
                                     onClick={() => setSelectedItem(item)}
-                                    className={`group relative aspect-video bg-black/40 rounded-xl overflow-hidden border transition-all cursor-pointer ${item.type === 'video' ? 'border-indigo-500/20 hover:border-indigo-500/50' : 'border-emerald-500/20 hover:border-emerald-500/50'
+                                    className={`group relative aspect-video bg-white dark:bg-black/40 rounded-xl overflow-hidden border transition-all cursor-pointer shadow-sm dark:shadow-none ${item.type === 'video' ? 'border-indigo-100 hover:border-indigo-300 dark:border-indigo-500/20 dark:hover:border-indigo-500/50' : 'border-emerald-100 hover:border-emerald-300 dark:border-emerald-500/20 dark:hover:border-emerald-500/50'
                                         }`}
                                 >
                                     {/* Thumbnail / Preview */}
@@ -178,13 +180,13 @@ const MediaPage = () => {
                                         <img
                                             src={item.url}
                                             alt={item.name}
-                                            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+                                            className="w-full h-full object-cover opacity-90 dark:opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
                                         />
                                     ) : (
-                                        <div className="w-full h-full flex items-center justify-center bg-slate-900 group-hover:scale-105 transition-transform duration-500">
-                                            <video src={item.url} className="w-full h-full object-cover opacity-60" />
+                                        <div className="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-900 group-hover:scale-105 transition-transform duration-500">
+                                            <video src={item.url} className="w-full h-full object-cover opacity-80 dark:opacity-60" />
                                             <div className="absolute inset-0 flex items-center justify-center">
-                                                <div className="p-3 bg-white/10 backdrop-blur-md rounded-full text-white group-hover:bg-indigo-500 group-hover:scale-110 transition-all">
+                                                <div className="p-3 bg-white/30 dark:bg-white/10 backdrop-blur-md rounded-full text-white group-hover:bg-indigo-500 group-hover:scale-110 transition-all shadow-lg">
                                                     <Play size={20} fill="currentColor" />
                                                 </div>
                                             </div>
@@ -192,25 +194,25 @@ const MediaPage = () => {
                                     )}
 
                                     {/* Overlay Info */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3">
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3">
                                         <div className="flex items-center gap-2 mb-1">
                                             {item.type === 'video' ? <Video size={12} className="text-indigo-400" /> : <Image size={12} className="text-emerald-400" />}
                                             <p className="text-white text-xs font-medium truncate flex-1">{item.name}</p>
                                         </div>
-                                        <p className="text-slate-400 text-[10px] mb-2">{item.date} • {item.size}</p>
+                                        <p className="text-slate-300 text-[10px] mb-2">{item.date} • {item.size}</p>
 
                                         <div className="flex gap-2 justify-end">
                                             <button
                                                 onClick={(e) => handleDownload(item, e)}
                                                 className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
-                                                title="Descargar"
+                                                title={t("media.download")}
                                             >
                                                 <Download size={14} />
                                             </button>
                                             <button
                                                 onClick={(e) => handleDelete(item, e)}
                                                 className="p-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/40 text-rose-400 transition-colors"
-                                                title="Eliminar"
+                                                title={t("media.delete")}
                                             >
                                                 <Trash2 size={14} />
                                             </button>
@@ -220,11 +222,11 @@ const MediaPage = () => {
                             ))}
                         </div>
                     ) : (
-                        <div className="h-64 flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-white/5 rounded-2xl">
-                            <div className="p-4 bg-white/5 rounded-full mb-4">
+                        <div className="h-64 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 border-2 border-dashed border-slate-200 dark:border-white/5 rounded-2xl transition-colors">
+                            <div className="p-4 bg-slate-100 dark:bg-white/5 rounded-full mb-4 transition-colors">
                                 {activeTab === 'videos' ? <FileVideo size={32} /> : <Image size={32} />}
                             </div>
-                            <p>No se encontraron archivos.</p>
+                            <p>{t("media.no_files")}</p>
                         </div>
                     )}
                 </div>
@@ -274,13 +276,13 @@ const MediaPage = () => {
                                     onClick={(e) => handleDownload(selectedItem, e)}
                                     className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
                                 >
-                                    <Download size={18} /> Descargar
+                                    <Download size={18} /> {t("media.download")}
                                 </button>
                                 <button
                                     onClick={(e) => handleDelete(selectedItem, e)}
                                     className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg transition-colors border border-rose-500/20"
                                 >
-                                    <Trash2 size={18} /> Eliminar
+                                    <Trash2 size={18} /> {t("media.delete")}
                                 </button>
                             </div>
                         </div>
