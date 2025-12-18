@@ -14,6 +14,61 @@ const Recordings = () => {
 
     const [selectedVideo, setSelectedVideo] = useState(null);
 
+    const handleDelete = (filename) => {
+        if (!confirm("¿Estás seguro de eliminar esta grabación?")) return;
+
+        // On Windows, playing a video locks the file. We must unmount the player first.
+        const isPlaying = selectedVideo === filename;
+        if (isPlaying) {
+            setSelectedVideo(null);
+        }
+
+        // Give the OS a tiny moment to release the file lock if it was playing
+        setTimeout(() => {
+            fetch(`http://127.0.0.1:8001/api/recordings/${filename}`, { method: 'DELETE' })
+                .then(async res => {
+                    if (res.ok) return { status: 'deleted' };
+                    try {
+                        return await res.json();
+                    } catch {
+                        return { error: `HTTP ${res.status} ${res.statusText}` };
+                    }
+                })
+                .then(data => {
+                    if (data.status === 'deleted') {
+                        setRecordings(prev => prev.filter(r => r.name !== filename));
+                    } else {
+                        const msg = data.error || data.detail || "Error desconocido";
+                        alert("Error eliminando: " + msg);
+                    }
+                })
+                .catch(err => {
+                    console.error("Error deleting:", err);
+                    alert("Error de conexión al eliminar.");
+                });
+        }, isPlaying ? 200 : 0);
+    };
+
+    const handleDownload = async (filename) => {
+        try {
+            const response = await fetch(`http://127.0.0.1:8001/recordings/${filename}`);
+            if (!response.ok) throw new Error("Download failed");
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.style.display = "none";
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error("Download failed:", error);
+            alert("Error al descargar el archivo. Verifique la conexión.");
+        }
+    };
+
     return (
         <div className="space-y-6 animate-in fade-in duration-500 relative">
             {/* Video Modal */}
@@ -31,7 +86,7 @@ const Recordings = () => {
                         </div>
                         <div className="aspect-video bg-black relative">
                             <video
-                                src={`http://127.0.0.1:8001/recordings_files/${selectedVideo}`}
+                                src={`http://127.0.0.1:8001/recordings/${selectedVideo}`}
                                 controls
                                 autoPlay
                                 className="w-full h-full"
@@ -67,7 +122,7 @@ const Recordings = () => {
                                         <span className="font-medium text-slate-200">{rec.name}</span>
                                     </td>
                                     <td className="p-4 text-slate-400">{rec.date}</td>
-                                    <td className="p-4 text-slate-400">25 MB</td>
+                                    <td className="p-4 text-slate-400">{rec.size}</td>
                                     <td className="p-4 text-right">
                                         <div className="flex justify-end gap-2">
                                             <button
@@ -77,10 +132,18 @@ const Recordings = () => {
                                             >
                                                 <Play size={18} />
                                             </button>
-                                            <button className="p-2 hover:bg-blue-500/20 rounded-lg text-blue-400 transition-colors" title="Descargar">
+                                            <button
+                                                onClick={() => handleDownload(rec.name)}
+                                                className="p-2 hover:bg-blue-500/20 rounded-lg text-blue-400 transition-colors"
+                                                title="Descargar"
+                                            >
                                                 <Download size={18} />
                                             </button>
-                                            <button className="p-2 hover:bg-rose-500/20 rounded-lg text-rose-400 transition-colors" title="Eliminar">
+                                            <button
+                                                onClick={() => handleDelete(rec.name)}
+                                                className="p-2 hover:bg-rose-500/20 rounded-lg text-rose-400 transition-colors"
+                                                title="Eliminar"
+                                            >
                                                 <Trash2 size={18} />
                                             </button>
                                         </div>

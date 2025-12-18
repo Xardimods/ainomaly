@@ -1,20 +1,21 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Video, FileText, Camera, Settings, Activity, Bell } from 'lucide-react';
+import { LayoutDashboard, Video, FileText, Camera, Settings, Activity, Bell, FolderOpen } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 const Sidebar = () => {
+    const { t } = useLanguage();
+
     const navItems = [
-        { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-        { name: 'Cámaras', path: '/cameras', icon: Camera },
-        { name: 'Alertas', path: '/alerts', icon: Bell },
-        { name: 'Grabaciones', path: '/recordings', icon: Video },
-        { name: 'Archivos', path: '/files', icon: FileText },
-        { name: 'Test Cámara', path: '/camera-test', icon: Activity },
-        { name: 'Configuración', path: '/settings', icon: Settings },
+        { name: t('nav.dashboard'), path: '/dashboard', icon: LayoutDashboard },
+        { name: t('nav.cameras'), path: '/cameras', icon: Camera },
+        { name: t('nav.alerts'), path: '/alerts', icon: Bell },
+        { name: t('nav.media'), path: '/media', icon: FolderOpen },
+        { name: t('nav.settings'), path: '/settings', icon: Settings },
     ];
 
     return (
-        <aside className="w-64 h-full flex flex-col p-4">
+        <aside className="w-64 h-full flex flex-col p-4 bg-slate-900 border-r border-slate-800 dark:border-white/5 transition-colors">
             {/* Header */}
             <div className="px-4 py-6 mb-4">
                 <h1 className="text-2xl font-bold flex items-center gap-3 tracking-wider text-white">
@@ -35,7 +36,7 @@ const Sidebar = () => {
                         className={({ isActive }) =>
                             `relative flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-300 group ${isActive
                                 ? 'bg-blue-600/10 text-blue-400 shadow-[0_0_20px_-10px_rgba(59,130,246,0.5)]'
-                                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5'
+                                : 'text-slate-400 hover:text-white hover:bg-white/5'
                             }`
                         }
                     >
@@ -60,8 +61,8 @@ const Sidebar = () => {
                         <span className="absolute inset-0 rounded-full bg-emerald-500 blur-sm animate-pulse"></span>
                     </div>
                     <div>
-                        <p className="text-xs font-semibold text-white">System Online</p>
-                        <p className="text-[10px] text-emerald-400/80 tracking-wider">SECURE CONNECTION</p>
+                        <p className="text-xs font-semibold text-white">{t('system.online')}</p>
+                        <p className="text-[10px] text-emerald-400/80 tracking-wider">{t('secure.connection')}</p>
                     </div>
                 </div>
             </div>

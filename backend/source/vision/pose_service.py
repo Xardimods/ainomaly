@@ -71,16 +71,7 @@ class PoseService:
                         if event:
                             on_event(event, posture)
                         
-                        # Continuous monitoring for AlertManager
-                        if self.alert_manager:
-                            alert_status = "Caída detectada" if posture == "Caido" else "Normal"
-                            self.alert_manager.process_event(
-                                self.camera_id, 
-                                f"Cámara {self.camera_id}", 
-                                alert_status, 
-                                0.90, 
-                                frame
-                            )
+
                         break
 
             # --- DRAWING (Always draw using cached results) ---
@@ -162,6 +153,20 @@ class PoseService:
         except Exception as e:
             # print(f"[PoseService] Error processing frame: {e}")
             pass
+            
+        if self.alert_manager:
+             # Check for alerts using the fully drawn frame
+             alert_status = "Caída detectada" if self.last_posture == "Caido" else "Normal"
+             self.alert_manager.process_event(
+                self.camera_id, 
+                f"Cámara {self.camera_id}", 
+                alert_status, 
+                0.90, 
+                frame
+             )
+             
+             # Pass to AlertManager for potential recording
+             self.alert_manager.write_frame(self.camera_id, frame)
             
         return frame
 

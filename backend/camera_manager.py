@@ -53,18 +53,23 @@ class RTSPStream:
                     self.is_reconnecting = True
                     
                     # Logic differentiation based on source type
+                    # Logic differentiation based on source type
                     if isinstance(self.source, int):
                         # WEBCAM (USB)
                         print(f"[CAM] Connecting to Webcam {self.source}...")
-                        # On Windows, CAP_DSHOW is often faster/more reliable for webcams
+                        # On Windows, try CAP_DSHOW first (faster)
                         if os.name == 'nt':
                             cap = cv2.VideoCapture(self.source, cv2.CAP_DSHOW)
+                            # Fallback if DSHOW fails to open or is extremely slow
+                            if not cap.isOpened():
+                                print(f"[CAM] DirectShow failed for Webcam {self.source}. Trying Auto...")
+                                cap = cv2.VideoCapture(self.source)
                         else:
                             cap = cv2.VideoCapture(self.source)
                     else:
                         # RTSP / IP STREAM
                         # Force TCP for RTSP stability (prevents UDP packet loss artifacts)
-                        # os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;tcp"
+                        os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;tcp"
                         print(f"[RTSP] Connecting to {self.name}...")
                         # Force FFMPEG backend for network streams
                         cap = cv2.VideoCapture(self.source, cv2.CAP_FFMPEG)
@@ -135,11 +140,13 @@ class RTSPStream:
                 src = int(source)
                 if os.name == 'nt':
                     cap = cv2.VideoCapture(src, cv2.CAP_DSHOW)
+                    if not cap.isOpened():
+                         cap = cv2.VideoCapture(src)
                 else:
                     cap = cv2.VideoCapture(src)
             else:
                 # RTSP Logic
-                # os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;tcp"
+                os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;tcp"
                 cap = cv2.VideoCapture(source, cv2.CAP_FFMPEG)
 
             if cap and cap.isOpened():
