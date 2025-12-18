@@ -1,21 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, History, Settings, Send, Save, AlertTriangle, CheckCircle, Smartphone } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import { Bell, History, Settings, Send, Save, AlertTriangle, CheckCircle, Smartphone, X, Trash2 } from 'lucide-react';
 
 const AlertsPage = () => {
-    const [activeTab, setActiveTab] = useState('config'); // config, rules, history
+    const location = useLocation();
+    const [activeTab, setActiveTab] = useState(location.state?.tab || 'config'); // config, rules, history
     const [settings, setSettings] = useState({
         telegram_token: "",
         telegram_chat_id: "",
+        telegram_chat_ids: [],
         enabled: false,
         min_duration: 2.0,
         cooldown: 60,
-        attach_image: true
+        attach_image: true,
+        notification_duration: 5
     });
     const [history, setHistory] = useState([]);
     const [statusMsg, setStatusMsg] = useState("");
     const [testing, setTesting] = useState(false);
     const [scanning, setScanning] = useState(false);
     const [discoveredUsers, setDiscoveredUsers] = useState([]);
+    const [newChatId, setNewChatId] = useState("");
 
     const fetchSettings = () => {
         fetch('http://127.0.0.1:8001/alerts/settings')
@@ -30,6 +35,8 @@ const AlertsPage = () => {
             .then(data => setHistory(data))
             .catch(err => console.error("Error fetching history:", err));
     };
+
+
 
     useEffect(() => {
         fetchSettings();
@@ -70,7 +77,10 @@ const AlertsPage = () => {
 
                 // Auto-fill Chat ID if found
                 if (data.success && data.chat_id) {
-                    setSettings(prev => ({ ...prev, telegram_chat_id: data.chat_id }));
+                    const current = settings.telegram_chat_ids || [];
+                    if (!current.includes(data.chat_id)) {
+                        setSettings(prev => ({ ...prev, telegram_chat_ids: [...current, data.chat_id] }));
+                    }
                 }
 
                 setTesting(false);
@@ -110,6 +120,20 @@ const AlertsPage = () => {
             .then(res => res.json())
             .then(() => setStatusMsg("Alerta de prueba enviada"))
             .catch(() => setStatusMsg("Error al enviar prueba"));
+    };
+
+    const handleDeleteAlert = (id) => {
+        if (!confirm("¿Eliminar esta alerta del historial?")) return;
+
+        fetch(`http://127.0.0.1:8001/alerts/history/${id}`, { method: 'DELETE' })
+            .then(res => {
+                if (res.ok) {
+                    setHistory(prev => prev.filter(item => item.id !== id));
+                } else {
+                    alert("Error eliminando alerta");
+                }
+            })
+            .catch(err => console.error(err));
     };
 
     return (
@@ -174,14 +198,61 @@ const AlertsPage = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-2">Chat ID (Usuario o Grupo)</label>
-                                <input
-                                    type="text"
-                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors font-mono text-sm"
-                                    placeholder="-1001234567890"
-                                    value={settings.telegram_chat_id}
-                                    onChange={e => setSettings({ ...settings, telegram_chat_id: e.target.value })}
-                                />
+                                <label className="block text-sm font-medium text-slate-300 mb-2">Destinatarios (Chat IDs)</label>
+
+                                <div className="flex flex-wrap gap-2 mb-3 min-h-[32px] content-center">
+                                    {(settings.telegram_chat_ids || []).map((id, idx) => (
+                                        <div key={idx} className="bg-blue-500/10 border border-blue-500/30 text-blue-200 pl-3 pr-2 py-1 rounded-full text-xs font-medium flex items-center gap-2 animate-in zoom-in-50 duration-200">
+                                            <span>{id}</span>
+                                            <button
+                                                onClick={() => {
+                                                    const newIds = settings.telegram_chat_ids.filter(x => x !== id);
+                                                    setSettings({ ...settings, telegram_chat_ids: newIds });
+                                                }}
+                                                className="hover:text-white p-0.5 rounded-full hover:bg-white/10 transition-colors"
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {(settings.telegram_chat_ids || []).length === 0 && (
+                                        <span className="text-slate-500 text-sm italic py-1">Sin destinatarios configurados</span>
+                                    )}
+                                </div>
+
+                                <div className="flex gap-2 mb-2">
+                                    <input
+                                        type="text"
+                                        className="flex-1 bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors font-mono text-sm placeholder:text-slate-600"
+                                        placeholder="Agregar ID manualmente... / o Buscar usuarios abajo"
+                                        value={newChatId}
+                                        onChange={e => setNewChatId(e.target.value)}
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter' && newChatId) {
+                                                const current = settings.telegram_chat_ids || [];
+                                                if (!current.includes(newChatId)) {
+                                                    setSettings({ ...settings, telegram_chat_ids: [...current, newChatId] });
+                                                    setNewChatId("");
+                                                }
+                                            }
+                                        }}
+                                    />
+                                    <button
+                                        onClick={() => {
+                                            if (newChatId) {
+                                                const current = settings.telegram_chat_ids || [];
+                                                if (!current.includes(newChatId)) {
+                                                    setSettings({ ...settings, telegram_chat_ids: [...current, newChatId] });
+                                                    setNewChatId("");
+                                                }
+                                            }
+                                        }}
+                                        className="px-4 bg-white/10 hover:bg-white/20 rounded-lg text-white border border-white/10"
+                                    >
+                                        <CheckCircle size={18} />
+                                    </button>
+                                </div>
+
                                 <div className="mt-2">
                                     <button
                                         onClick={handleScanUsers}
@@ -193,23 +264,33 @@ const AlertsPage = () => {
 
                                     {discoveredUsers.length > 0 && (
                                         <div className="bg-slate-900/50 rounded-lg p-2 border border-white/5 space-y-1 max-h-40 overflow-y-auto animate-in fade-in slide-in-from-top-2">
-                                            {discoveredUsers.map(u => (
-                                                <button
-                                                    key={u.id}
-                                                    onClick={() => setSettings({ ...settings, telegram_chat_id: u.id })}
-                                                    className="w-full text-left p-2 hover:bg-white/5 rounded-md flex justify-between items-center group transition-colors"
-                                                >
-                                                    <div>
-                                                        <p className="text-sm text-slate-200 font-medium">{u.name}</p>
-                                                        <p className="text-xs text-slate-500 uppercase tracking-wider text-[10px]">{u.type} • {u.id}</p>
-                                                    </div>
-                                                    {settings.telegram_chat_id === u.id && <CheckCircle size={16} className="text-emerald-500" />}
-                                                </button>
-                                            ))}
+                                            {discoveredUsers.map(u => {
+                                                const isAdded = (settings.telegram_chat_ids || []).includes(u.id);
+                                                return (
+                                                    <button
+                                                        key={u.id}
+                                                        onClick={() => {
+                                                            const current = settings.telegram_chat_ids || [];
+                                                            if (current.includes(u.id)) {
+                                                                setSettings({ ...settings, telegram_chat_ids: current.filter(x => x !== u.id) });
+                                                            } else {
+                                                                setSettings({ ...settings, telegram_chat_ids: [...current, u.id] });
+                                                            }
+                                                        }}
+                                                        className={`w-full text-left p-2 hover:bg-white/5 rounded-md flex justify-between items-center group transition-colors ${isAdded ? 'bg-blue-500/10' : ''}`}
+                                                    >
+                                                        <div>
+                                                            <p className={`text-sm font-medium ${isAdded ? 'text-blue-200' : 'text-slate-200'}`}>{u.name}</p>
+                                                            <p className="text-xs text-slate-500 uppercase tracking-wider text-[10px]">{u.type} • {u.id}</p>
+                                                        </div>
+                                                        {isAdded ? <CheckCircle size={16} className="text-emerald-500" /> : <span className="text-slate-600 text-xs group-hover:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">Agregar</span>}
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
                                     )}
                                 </div>
-                                <p className="text-xs text-slate-500 mt-1">Dejar vacío para auto-detectar o usar el buscador.</p>
+                                <p className="text-xs text-slate-500 mt-1">Puedes agregar múltiples destinatarios (usuarios o grupos) para recibir alertas.</p>
                             </div>
 
                             <div className="flex items-center gap-3 p-4 bg-white/5 rounded-xl border border-white/5">
@@ -220,6 +301,21 @@ const AlertsPage = () => {
                                     <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings.enabled ? 'translate-x-6' : 'translate-x-1'}`} />
                                 </button>
                                 <span className="text-sm font-medium text-white">Activar Sistema de Alertas Global</span>
+                            </div>
+
+                            <div>
+                                <div className="flex justify-between mb-2">
+                                    <label className="text-sm font-medium text-slate-300">Duración de Notificación en Pantalla (segundos)</label>
+                                    <span className="text-blue-400 font-mono bg-blue-900/20 px-2 rounded">{settings.notification_duration || 5}s</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="3" max="20" step="1"
+                                    value={settings.notification_duration || 5}
+                                    onChange={e => setSettings({ ...settings, notification_duration: parseInt(e.target.value) })}
+                                    className="w-full accent-blue-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer"
+                                />
+                                <p className="text-xs text-slate-500 mt-2">Tiempo que el mensaje de alerta permanece visible en la aplicación de escritorio.</p>
                             </div>
                         </div>
 
@@ -336,7 +432,7 @@ const AlertsPage = () => {
                                 <tbody className="divide-y divide-white/5">
                                     {history.length > 0 ? (
                                         history.map((alert, idx) => (
-                                            <tr key={idx} className="hover:bg-white/5 transition-colors">
+                                            <tr key={alert.id || idx} className="hover:bg-white/5 transition-colors group">
                                                 <td className="p-4 text-slate-300 font-mono text-sm">{alert.date}</td>
                                                 <td className="p-4 text-white font-medium">{alert.camera}</td>
                                                 <td className="p-4">
@@ -353,8 +449,18 @@ const AlertsPage = () => {
                                                         <span className="text-slate-500 text-sm">{alert.status}</span>
                                                     )}
                                                 </td>
-                                                <td className="p-4 text-right text-slate-500 text-xs max-w-xs truncate">
-                                                    {alert.details}
+                                                <td className="p-4 text-right">
+                                                    <div className="flex items-center justify-end gap-3">
+                                                        <span className="text-slate-500 text-xs max-w-xs truncate">{alert.details}</span>
+                                                        <button
+                                                            onClick={() => handleDeleteAlert(alert.id)}
+                                                            className="text-slate-600 hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-all p-1.5 hover:bg-rose-500/10 rounded-lg"
+                                                            title="Eliminar del historial"
+                                                            disabled={!alert.id}
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))

@@ -36,7 +36,7 @@
         "name": "orueba",
         "source": "0",
         "type": "webcam",
-        "enabled": true,
+        "enabled": false,
         "config": {
             "name": "orueba",
             "type": "webcam",

@@ -1,15 +1,14 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Video, FileText, Camera, Settings, Activity, Bell } from 'lucide-react';
+import { LayoutDashboard, Video, FileText, Camera, Settings, Activity, Bell, FolderOpen } from 'lucide-react';
 
 const Sidebar = () => {
     const navItems = [
         { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
         { name: 'Cámaras', path: '/cameras', icon: Camera },
         { name: 'Alertas', path: '/alerts', icon: Bell },
-        { name: 'Grabaciones', path: '/recordings', icon: Video },
-        { name: 'Archivos', path: '/files', icon: FileText },
-        { name: 'Test Cámara', path: '/camera-test', icon: Activity },
+        { name: 'Media', path: '/media', icon: FolderOpen },
+
         { name: 'Configuración', path: '/settings', icon: Settings },
     ];
 

@@ -23,6 +23,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Ensure snapshots dir exists for static serving
+SNAPSHOTS_DIR = "snapshots"
+if not os.path.exists(SNAPSHOTS_DIR):
+    os.makedirs(SNAPSHOTS_DIR)
+
+app.mount("/snapshots", StaticFiles(directory=SNAPSHOTS_DIR), name="snapshots")
+
+# Ensure recordings dir exists for static serving
+RECORDINGS_DIR = "recordings"
+if not os.path.exists(RECORDINGS_DIR):
+    os.makedirs(RECORDINGS_DIR)
+
+app.mount("/recordings", StaticFiles(directory=RECORDINGS_DIR), name="recordings")
+
 # Global variables
 from camera_manager import RTSPStream
 from source.vision.pose_service import PoseService
@@ -272,6 +286,58 @@ def get_recordings():
         })
     return data
 
+    return data
+
+@app.delete("/api/recordings/{filename}")
+def delete_recording(filename: str):
+    # Security: prevent directory traversal
+    filename = os.path.basename(filename) 
+    file_path = os.path.join(RECORDINGS_DIR, filename)
+    if os.path.exists(file_path):
+        try:
+            os.remove(file_path)
+            return {"status": "deleted"}
+        except Exception as e:
+            return {"error": f"Error del sistema: {str(e)}"}
+    return {"error": "File not found"}
+
+@app.get("/snapshots")
+def get_snapshots():
+    if not os.path.exists(SNAPSHOTS_DIR):
+        return []
+    
+    files = glob.glob(os.path.join(SNAPSHOTS_DIR, "*.jpg"))
+    data = []
+    # Sort files by creation time descending
+    files.sort(key=os.path.getctime, reverse=True)
+    
+    for f in files:
+        stats = os.stat(f)
+        size_kb = round(stats.st_size / 1024, 1)
+        created = datetime.fromtimestamp(stats.st_ctime).strftime('%Y-%m-%d %H:%M:%S')
+        name = os.path.basename(f)
+        
+        data.append({
+            "name": name,
+            "url": f"/snapshots/{name}",
+            "date": created,
+            "size": f"{size_kb} KB"
+        })
+    return data
+
+@app.delete("/api/snapshots/{filename}")
+def delete_snapshot(filename: str):
+    # Security: prevent directory traversal
+    filename = os.path.basename(filename) 
+    file_path = os.path.join(SNAPSHOTS_DIR, filename)
+    if os.path.exists(file_path):
+        try:
+            os.remove(file_path)
+            return {"status": "deleted"}
+        except Exception as e:
+            return {"error": f"Error del sistema: {str(e)}"}
+    return {"error": "File not found"}
+
 @app.get("/settings")
 def get_settings():
     if os.path.exists(SETTINGS_FILE):
@@ -301,6 +367,13 @@ def update_alert_settings(settings: dict):
 def get_alert_history():
     return alert_manager.get_history()
 
+@app.delete("/alerts/history/{alert_id}")
+def delete_alert(alert_id: str):
+    success = alert_manager.delete_alert(alert_id)
+    if success:
+        return {"status": "deleted"}
+    return {"error": "Alert not found"}, 404
+
 from pydantic import BaseModel
 from typing import Optional
 
@@ -323,6 +396,42 @@ def test_full_alert():
     # Simulate a fall alert
     alert_manager._trigger_alert("TEST", "Cámara de Prueba", "Caída detectada (SIMULACRO)", 0.99, None)
     return {"status": "triggered"}
+
+import shutil
+
+@app.get("/status")
+def get_system_status():
+    # System Stats (non-blocking)
+    cpu = psutil.cpu_percent(interval=None)
+    ram = psutil.virtual_memory().percent
+    
+    # Camera Status
+    active_count = 0
+    # Check actual running streams
+    for cam_id, stream in active_cameras.items():
+        if stream.running:
+            active_count += 1
+            
+    cam_status = f"{active_count} Activas" if active_count > 0 else "Standby"
+    
+    # Storage Usage (Percentage of partition where . is located)
+    # If RECORDINGS_DIR doesn't exist, use current dir
+    target_dir = RECORDINGS_DIR if os.path.exists(RECORDINGS_DIR) else "."
+    total, used, free = shutil.disk_usage(target_dir)
+    storage_percent = round((used / total) * 100, 1)
+
+    return {
+        "connected": True,
+        "camera_status": cam_status,
+        "system": {
+            "cpu": cpu,
+            "ram": ram
+        },
+        "storage": {
+            "percent": storage_percent,
+            "free_gb": round(free / (1024**3), 1)
+        }
+    }
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8001)
