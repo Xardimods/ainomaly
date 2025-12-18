@@ -1,4 +1,4 @@
-# 🛡️ AInomaly
+# AInomaly
 
 ### _Sistema de Videoreconocimiento de Anomalías en Tiempo Real_
 
@@ -6,25 +6,26 @@
 
 ---
 
-### 🚀 Arquitectura del Sistema
+### Arquitectura del Sistema
 
 El proyecto se divide en dos módulos principales que se comunican entre sí:
 
 1.  **Backend (Python/FastAPI):**
-    *   **👁️ The Eye (Visión):** Procesamiento de video en tiempo real utilizando **YOLOv8-Pose**.
-    *   **🧠 The Brain (Lógica):** Análisis de vectores esqueléticos para detectar caídas con alta precisión.
-    *   **🔔 The Messenger (Alertas):** Gestión de notificaciones, bot de Telegram y almacenamiento de eventos.
-    *   **📹 Stream Server:** Servidor RSTP/MJPEG optimizado para transmitir video procesado al frontend.
+
+    - **The Eye (Visión):** Procesamiento de video en tiempo real utilizando **YOLOv8-Pose**.
+    - **The Brain (Lógica):** Análisis de vectores esqueléticos para detectar caídas con alta precisión.
+    - **The Messenger (Alertas):** Gestión de notificaciones, bot de Telegram y almacenamiento de eventos.
+    - **Stream Server:** Servidor RSTP/MJPEG optimizado para transmitir video procesado al frontend.
 
 2.  **Frontend (Electron + React):**
-    *   **🖥️ Interfaz de Usuario:** Dashboard moderno con soporte para modo oscuro.
-    *   **⚙️ Configuración:** Gestión de cámaras, zonas de detección y sensibilidad.
-    *   **📊 Historial:** Visualización de alertas pasadas y grabaciones de evidencia.
-    *   **🔌 Control:** Inicio y parada automática del motor de IA.
+    - **Interfaz de Usuario:** Dashboard moderno con soporte para modo oscuro.
+    - **Configuración:** Gestión de cámaras, zonas de detección y sensibilidad.
+    - **Historial:** Visualización de alertas pasadas y grabaciones de evidencia.
+    - **Control:** Inicio y parada automática del motor de IA.
 
 ---
 
-### 📂 Estructura del Proyecto
+### Estructura del Proyecto
 
 ```
 ainomaly/
@@ -45,23 +46,25 @@ ainomaly/
 
 ---
 
-### 🛠️ Tecnologías
+### Tecnologías
 
-*   **IA / Visión:** YOLOv8, OpenCV, NumPy
-*   **Backend:** FastAPI, Uvicorn
-*   **Frontend:** Electron, React, TailwindCSS
-*   **Notificaciones:** Telegram Bot API
-*   **Hardware:** Soporte para CPU (optimizado) y GPU (CUDA opcional)
+- **IA / Visión:** YOLOv8, OpenCV, NumPy
+- **Backend:** FastAPI, Uvicorn
+- **Frontend:** Electron, React, TailwindCSS
+- **Notificaciones:** Telegram Bot API
+- **Hardware:** Soporte para CPU (optimizado) y GPU (CUDA opcional)
 
 ---
 
-### 🚦 Instalación y Ejecución
+### Instalación y Ejecución
 
 #### Prerrequisitos
-*   **Python 3.10+**
-*   **Node.js 18+**
+
+- **Python 3.10+**
+- **Node.js 18+**
 
 #### 1. Configuración del Entorno Python
+
 Instala las dependencias del backend en la raíz del proyecto:
 
 ```bash
@@ -69,6 +72,7 @@ pip install -r requirements.txt
 ```
 
 #### 2. Configuración del Frontend
+
 Instala las dependencias de Node.js dentro de la carpeta `electron-app`:
 
 ```bash
@@ -77,6 +81,7 @@ npm install
 ```
 
 #### 3. Ejecutar la Aplicación
+
 Para iniciar el sistema completo (Frontend + Backend automático):
 
 ```bash
@@ -89,5 +94,6 @@ El backend de Python se iniciará automáticamente en segundo plano cuando la ap
 ---
 
 ### 📝 Notas
-*   El modelo `yolov8n-pose.pt` se descargará automáticamente si no está presente en `backend/models/`.
-*   Asegúrate de tener configurada una cámara válida (Webcam índice 0 o URL RTSP) en la configuración para ver video en vivo.
+
+- El modelo `yolov8n-pose.pt` se descargará automáticamente si no está presente en `backend/models/`.
+- Asegúrate de tener configurada una cámara válida (Webcam índice 0 o URL RTSP) en la configuración para ver video en vivo.
