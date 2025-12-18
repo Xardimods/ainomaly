@@ -99,7 +99,7 @@ def generate_frames(camera_id: str):
             
         # Process frame with Vision System (Throttled inside PoseService)
         if camera_id not in pose_services:
-            pose_services[camera_id] = PoseService()
+            pose_services[camera_id] = PoseService(camera_id=camera_id, alert_manager=alert_manager)
         
         try:
             frame = pose_services[camera_id].process_frame(frame)
@@ -111,10 +111,28 @@ def generate_frames(camera_id: str):
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
 
+
 @app.get("/video_feed")
 def video_feed(id: str):
     print(f"DEBUG: video_feed requested for ID: {id}")
     return StreamingResponse(generate_frames(id), media_type="multipart/x-mixed-replace; boundary=frame")
+
+import asyncio
+
+@app.get("/events")
+async def sse_events():
+    async def event_generator():
+        while True:
+            try:
+                while not alert_manager.notification_queue.empty():
+                    item = alert_manager.notification_queue.get_nowait()
+                    yield f"data: {json.dumps(item)}\n\n"
+            except Exception as e:
+                print(f"SSE Error: {e}")
+            
+            await asyncio.sleep(0.5)
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 # --- Camera Management Endpoints ---
 
@@ -266,6 +284,45 @@ def update_settings(settings: dict):
     with open(SETTINGS_FILE, 'w') as f:
         json.dump(settings, f, indent=4)
     return {"status": "saved"}
+
+# --- Alerts Management Endpoints ---
+from source.services.alert_manager import AlertManager
+alert_manager = AlertManager()
+
+@app.get("/alerts/settings")
+def get_alert_settings():
+    return alert_manager.get_settings()
+
+@app.post("/alerts/settings")
+def update_alert_settings(settings: dict):
+    return alert_manager.update_settings(settings)
+
+@app.get("/alerts/history")
+def get_alert_history():
+    return alert_manager.get_history()
+
+from pydantic import BaseModel
+from typing import Optional
+
+class TestAlertConfig(BaseModel):
+    telegram_token: Optional[str] = None
+    telegram_chat_id: Optional[str] = None
+
+@app.post("/alerts/discover")
+def discover_telegram_users(config: TestAlertConfig):
+    users = alert_manager.discover_users(token=config.telegram_token)
+    return users
+
+@app.post("/alerts/test")
+def test_alert_connection(config: TestAlertConfig):
+    success, msg, found_id = alert_manager.test_connection(token=config.telegram_token, chat_id=config.telegram_chat_id)
+    return {"success": success, "message": msg, "chat_id": found_id}
+
+@app.post("/alerts/test_full")
+def test_full_alert():
+    # Simulate a fall alert
+    alert_manager._trigger_alert("TEST", "Cámara de Prueba", "Caída detectada (SIMULACRO)", 0.99, None)
+    return {"status": "triggered"}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8001)

@@ -1,0 +1,9 @@
+{
+    "telegram_token": "8324365495:AAEfVn7agrFaAP2BnoEA8PhtRvAwpWD4J_0",
+    "telegram_chat_id": "6889078618",
+    "enabled": true,
+    "min_duration": 4.5,
+    "cooldown": 60,
+    "attach_image": true,
+    "save_snapshot": true
+}

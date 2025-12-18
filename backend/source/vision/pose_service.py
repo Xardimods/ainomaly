@@ -13,7 +13,9 @@ except ImportError:
     from chatbot import on_event
 
 class PoseService:
-    def __init__(self):
+    def __init__(self, camera_id="1", alert_manager=None):
+        self.camera_id = camera_id
+        self.alert_manager = alert_manager
         self.disabled = False
         self.detector = FallDetector()
         self.model = None
@@ -25,10 +27,10 @@ class PoseService:
         self.last_posture = "Desconocido"
         
         try:
-            print("[PoseService] Initializing YOLOv8n-pose...")
+            print(f"[PoseService] Initializing YOLOv8n-pose for Cam {camera_id}...")
             # Load nano model for speed
             self.model = YOLO('yolov8n-pose.pt') 
-            print("[PoseService] YOLOv8n-pose initialized.")
+            print(f"[PoseService] YOLOv8n-pose initialized for Cam {camera_id}.")
         except Exception as e:
             print(f"[PoseService] WARNING: Vision system disabled. Error: {e}")
             self.disabled = True
@@ -68,6 +70,17 @@ class PoseService:
                         
                         if event:
                             on_event(event, posture)
+                        
+                        # Continuous monitoring for AlertManager
+                        if self.alert_manager:
+                            alert_status = "Caída detectada" if posture == "Caido" else "Normal"
+                            self.alert_manager.process_event(
+                                self.camera_id, 
+                                f"Cámara {self.camera_id}", 
+                                alert_status, 
+                                0.90, 
+                                frame
+                            )
                         break
 
             # --- DRAWING (Always draw using cached results) ---

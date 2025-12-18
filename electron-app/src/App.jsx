@@ -6,6 +6,7 @@ import Rankings from './pages/Recordings'; // Mapped 'Grabaciones' to Recordings
 import CameraTest from './pages/CameraTest';
 import Settings from './pages/Settings';
 import Cameras from './pages/Cameras';
+import AlertsPage from './pages/AlertsPage';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/cameras" element={<Cameras />} />
+            <Route path="/alerts" element={<AlertsPage />} />
             <Route path="/recordings" element={<Rankings />} />
             <Route path="/files" element={<div className="p-10">Archivos (In Construction)</div>} />
             <Route path="/camera-test" element={<CameraTest />} />
