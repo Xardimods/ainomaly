@@ -56,16 +56,27 @@ class RTSPStream:
                     # Logic differentiation based on source type
                     if isinstance(self.source, int):
                         # WEBCAM (USB)
-                        print(f"[CAM] Connecting to Webcam {self.source}...")
-                        # On Windows, try CAP_DSHOW first (faster)
-                        if os.name == 'nt':
-                            cap = cv2.VideoCapture(self.source, cv2.CAP_DSHOW)
-                            # Fallback if DSHOW fails to open or is extremely slow
-                            if not cap.isOpened():
-                                print(f"[CAM] DirectShow failed for Webcam {self.source}. Trying Auto...")
+                        try:
+                            # Suppress excessive OpenCV logging for probing
+                            cv2.utils.logging.setLogLevel(cv2.utils.logging.LOG_LEVEL_ERROR)
+                            
+                            print(f"[CAM] Connecting to Webcam {self.source}...")
+                            
+                            # On Windows, try CAP_DSHOW first (faster)
+                            if os.name == 'nt':
+                                cap = cv2.VideoCapture(self.source, cv2.CAP_DSHOW)
+                                # Fallback if DSHOW fails to open or is extremely slow
+                                if not cap is None and not cap.isOpened():
+                                    print(f"[CAM] DirectShow failed for Webcam {self.source}. Trying Auto...")
+                                    cap = cv2.VideoCapture(self.source)
+                            else:
                                 cap = cv2.VideoCapture(self.source)
-                        else:
-                            cap = cv2.VideoCapture(self.source)
+
+                            if cap is None or not cap.isOpened():
+                                print(f"[CAM] Error: Camera Index {self.source} not found or occupied.")
+                        except Exception as e:
+                            print(f"[CAM] Exception opening Webcam {self.source}: {e}")
+                            cap = None
                     else:
                         # RTSP / IP STREAM
                         # Force TCP for RTSP stability (prevents UDP packet loss artifacts)
