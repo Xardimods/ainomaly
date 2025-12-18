@@ -5,9 +5,10 @@ import { LayoutDashboard, Video, FileText, Camera, Settings, Activity } from 'lu
 const Sidebar = () => {
     const navItems = [
         { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+        { name: 'Cámaras', path: '/cameras', icon: Camera },
         { name: 'Grabaciones', path: '/recordings', icon: Video },
         { name: 'Archivos', path: '/files', icon: FileText },
-        { name: 'Test Cámara', path: '/camera-test', icon: Camera },
+        { name: 'Test Cámara', path: '/camera-test', icon: Activity },
         { name: 'Configuración', path: '/settings', icon: Settings },
     ];
 

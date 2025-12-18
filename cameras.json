@@ -1,0 +1,34 @@
+[
+    {
+        "id": "1",
+        "name": "prueba",
+        "source": "rtsp://localhost:8554/webcam",
+        "type": "rtsp",
+        "enabled": false,
+        "config": {
+            "name": "prueba",
+            "type": "rtsp",
+            "ip": "localhost",
+            "port": "8554",
+            "user": "",
+            "password": "",
+            "path": "/webcam"
+        }
+    },
+    {
+        "id": "2",
+        "name": "prueba 2",
+        "source": "rtsp://localhost:8554/webcam",
+        "type": "rtsp",
+        "enabled": false,
+        "config": {
+            "name": "prueba 2",
+            "type": "rtsp",
+            "ip": "localhost",
+            "port": "8554",
+            "user": "",
+            "password": "",
+            "path": "/webcam"
+        }
+    }
+]

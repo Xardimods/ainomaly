@@ -12,8 +12,8 @@ const StatCard = ({ title, value, icon: Icon, color, trend }) => (
             </div>
             {trend && (
                 <span className={`text-xs px-2 py-1 rounded-full border ${trend > 0
-                        ? 'border-emerald-500/20 text-emerald-400 bg-emerald-500/10'
-                        : 'border-rose-500/20 text-rose-400 bg-rose-500/10'
+                    ? 'border-emerald-500/20 text-emerald-400 bg-emerald-500/10'
+                    : 'border-rose-500/20 text-rose-400 bg-rose-500/10'
                     }`}>
                     {trend > 0 ? '+' : ''}{trend}%
                 </span>
@@ -125,31 +125,34 @@ const Dashboard = () => {
 
                 {/* Server Status */}
                 <div className="glass-panel p-6 rounded-2xl border-white/5 flex flex-col">
-                    <h3 className="text-xl font-bold text-white mb-6">Estado de Servidores</h3>
+                    <h3 className="text-xl font-bold text-white mb-6">Estado del Sistema</h3>
 
                     <div className="space-y-6 flex-1">
                         <div className="space-y-2">
                             <div className="flex justify-between text-sm">
-                                <span className="text-slate-400">Backend API</span>
-                                <span className={status.connected ? "text-emerald-400" : "text-rose-400"}>
-                                    {status.connected ? '98%' : 'Errors'}
+                                <span className="text-slate-400">CPU Usage</span>
+                                <span className={status.connected ? "text-emerald-400" : "text-rose-400"} >
+                                    {status.system?.cpu || 0}%
                                 </span>
                             </div>
                             <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
                                 <div
-                                    className={`h-full rounded-full ${status.connected ? 'bg-emerald-500' : 'bg-rose-500'} transition-all duration-1000`}
-                                    style={{ width: status.connected ? '98%' : '5%' }}
+                                    className={`h-full rounded-full bg-emerald-500 transition-all duration-1000`}
+                                    style={{ width: `${status.system?.cpu || 0}%` }}
                                 ></div>
                             </div>
                         </div>
 
                         <div className="space-y-2">
                             <div className="flex justify-between text-sm">
-                                <span className="text-slate-400">Database</span>
-                                <span className="text-emerald-400">100%</span>
+                                <span className="text-slate-400">RAM Usage</span>
+                                <span className="text-blue-400">{status.system?.ram || 0}%</span>
                             </div>
                             <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-                                <div className="h-full bg-blue-500 rounded-full w-full"></div>
+                                <div
+                                    className="h-full bg-blue-500 rounded-full transition-all duration-1000"
+                                    style={{ width: `${status.system?.ram || 0}%` }}
+                                ></div>
                             </div>
                         </div>
 
@@ -160,7 +163,7 @@ const Dashboard = () => {
                                 </div>
                                 <div>
                                     <p className="text-xs font-bold text-amber-500 uppercase mb-1">Mantenimiento</p>
-                                    <p className="text-xs text-slate-400">Programado para mañana a las 03:00 AM. El sistema se reiniciará.</p>
+                                    <p className="text-xs text-slate-400">Sistema operativo y estable.</p>
                                 </div>
                             </div>
                         </div>
