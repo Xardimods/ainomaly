@@ -1,52 +1,93 @@
 # 🛡️ AInomaly
 
-### _Detector Inteligente de Anomalías y Caídas_
+### _Sistema de Videoreconocimiento de Anomalías en Tiempo Real_
 
-**AInomaly** es un sistema de seguridad automatizado que transforma una cámara estándar en un sensor inteligente. Utilizando visión por computadora y heurística geométrica, el sistema detecta caídas y comportamientos anómalos en tiempo real para enviar alertas inmediatas.
+**AInomaly** es una plataforma de seguridad avanzada que utiliza Inteligencia Artificial para detectar caídas y anomalías a través de cámaras de seguridad (RTSP) o webcams. Combina un potente backend en Python con una moderna interfaz de escritorio en Electron.
 
 ---
 
 ### 🚀 Arquitectura del Sistema
 
-El proyecto integra cuatro módulos principales operando en simultáneo:
+El proyecto se divide en dos módulos principales que se comunican entre sí:
 
-1.  **👁️ The Eye (Visión):** Captura video y extrae el esqueleto humano mediante **MediaPipe**.
-2.  **🧠 The Brain (Lógica):** Analiza vectores y ángulos para diferenciar una actividad normal de una caída crítica.
-3.  **🔔 The Messenger (IoT):** Envía notificaciones push y evidencia fotográfica a través de un **Bot de Telegram**.
-4.  **🖥️ The Face (Interfaz):** Dashboard interactivo en **Streamlit** para monitoreo en vivo.
+1.  **Backend (Python/FastAPI):**
+    *   **👁️ The Eye (Visión):** Procesamiento de video en tiempo real utilizando **YOLOv8-Pose**.
+    *   **🧠 The Brain (Lógica):** Análisis de vectores esqueléticos para detectar caídas con alta precisión.
+    *   **🔔 The Messenger (Alertas):** Gestión de notificaciones, bot de Telegram y almacenamiento de eventos.
+    *   **📹 Stream Server:** Servidor RSTP/MJPEG optimizado para transmitir video procesado al frontend.
+
+2.  **Frontend (Electron + React):**
+    *   **🖥️ Interfaz de Usuario:** Dashboard moderno con soporte para modo oscuro.
+    *   **⚙️ Configuración:** Gestión de cámaras, zonas de detección y sensibilidad.
+    *   **📊 Historial:** Visualización de alertas pasadas y grabaciones de evidencia.
+    *   **🔌 Control:** Inicio y parada automática del motor de IA.
 
 ---
 
-### ✨ Características Clave
+### 📂 Estructura del Proyecto
 
-- **Detección en Tiempo Real:** Procesamiento inmediato de frames de video.
-- **Privacidad:** El análisis ocurre localmente; solo se transmiten las alertas.
-- **Lógica Geométrica:** Alta precisión sin necesidad de entrenar redes neuronales pesadas (Black Boxes).
-- **Alertas Remotas:** Conexión directa al móvil del cuidador.
+```
+ainomaly/
+├── backend/               # Código fuente del servidor Python
+│   ├── api.py            # Punto de entrada FastAPI
+│   ├── models/           # Pesos del modelo (yolov8n-pose.pt)
+│   ├── source/           # Lógica de visión y detección
+│   └── ...
+├── electron-app/          # Aplicación de Escritorio (React)
+│   ├── src/              # Componentes y páginas
+│   ├── main.cjs          # Proceso principal de Electron
+│   └── ...
+├── scripts/               # Scripts de utilidad y depuración
+├── recordings/            # Videoclips de eventos detectados
+├── snapshots/             # Fotos de evidencia
+└── actions...
+```
 
 ---
 
 ### 🛠️ Tecnologías
 
-- **Lenguaje:** Python 3.x
-- **Visión:** OpenCV, MediaPipe Pose
-- **Comunicación:** Requests, Python-Telegram-Bot
-- **Frontend:** Streamlit
+*   **IA / Visión:** YOLOv8, OpenCV, NumPy
+*   **Backend:** FastAPI, Uvicorn
+*   **Frontend:** Electron, React, TailwindCSS
+*   **Notificaciones:** Telegram Bot API
+*   **Hardware:** Soporte para CPU (optimizado) y GPU (CUDA opcional)
 
 ---
 
-### 🚦 Instalación Rápida
+### 🚦 Instalación y Ejecución
 
-1.  **Instalar dependencias:**
+#### Prerrequisitos
+*   **Python 3.10+**
+*   **Node.js 18+**
 
-    ```bash
-    pip install -r requirements.txt
-    ```
+#### 1. Configuración del Entorno Python
+Instala las dependencias del backend en la raíz del proyecto:
 
-2.  **Configurar variables:**
-    Crea un archivo `.env` con tus credenciales (Token de Telegram y Chat ID).
+```bash
+pip install -r requirements.txt
+```
 
-3.  **Ejecutar AInomaly:**
-    ```bash
-    streamlit run main.py
-    ```
+#### 2. Configuración del Frontend
+Instala las dependencias de Node.js dentro de la carpeta `electron-app`:
+
+```bash
+cd electron-app
+npm install
+```
+
+#### 3. Ejecutar la Aplicación
+Para iniciar el sistema completo (Frontend + Backend automático):
+
+```bash
+# Desde la carpeta electron-app
+npm run electron
+```
+
+El backend de Python se iniciará automáticamente en segundo plano cuando la aplicación de escritorio se abra.
+
+---
+
+### 📝 Notas
+*   El modelo `yolov8n-pose.pt` se descargará automáticamente si no está presente en `backend/models/`.
+*   Asegúrate de tener configurada una cámara válida (Webcam índice 0 o URL RTSP) en la configuración para ver video en vivo.

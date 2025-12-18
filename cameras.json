@@ -20,7 +20,7 @@
         "name": "prueba",
         "source": "rtsp://716f898c7b71.entrypoint.cloud.wowza.com:1935/app-8F9K44lJ/304679fe_stream2",
         "type": "rtsp",
-        "enabled": true,
+        "enabled": false,
         "config": {
             "name": "prueba",
             "type": "rtsp",
