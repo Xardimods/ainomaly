@@ -113,6 +113,8 @@ export const translations = {
         "settings.sensitivity": "Sensibilidad de detección",
         "settings.autosave": "Guardar clips automáticamente",
         "settings.telegram_notify": "Enviar notificaciones a Telegram",
+        "settings.theme_light": "Modo Claro",
+        "settings.theme_dark": "Modo Oscuro",
         "settings.save": "Guardar Cambios",
 
         // Dialogs
@@ -241,6 +243,8 @@ export const translations = {
         "settings.sensitivity": "Detection Sensitivity",
         "settings.autosave": "Auto-save clips",
         "settings.telegram_notify": "Send Telegram notifications",
+        "settings.theme_light": "Light Mode",
+        "settings.theme_dark": "Dark Mode",
         "settings.save": "Save Changes",
 
         // Dialogs

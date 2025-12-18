@@ -1,58 +1,41 @@
 @import "tailwindcss";
 
-:root {
-  /* Modern Palette - Deep Blue/Black & Neon */
-  --bg-app: #0f172a;
-  /* Slate 900 */
-  --bg-sidebar: #1e293b50;
-  /* Slate 800 with opacity */
-  --bg-card: #1e293b80;
-  /* Slate 800 with higher opacity */
+@layer base {
+  :root {
+    /* DEFAULT DARK THEME */
+    --text-primary: #f8fafc;
+    /* Slate 50 */
+    --text-secondary: #94a3b8;
+    /* Slate 400 */
+    --bg-app: #0f172a;
+    /* Slate 900 */
+    --glass-bg: rgba(30, 41, 59, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.08);
+  }
 
-  --primary: #3b82f6;
-  /* Blue 500 */
-  --primary-glow: #3b82f640;
-
-  --accent: #10b981;
-  /* Emerald 500 */
-  --accent-glow: #10b98140;
-
-  --text-primary: #f8fafc;
-  /* Slate 50 */
-  --text-secondary: #94a3b8;
-  /* Slate 400 */
-
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-bg: rgba(30, 41, 59, 0.4);
-  /* --glass-bg: rgba(255, 255, 255, 0.03); */
-
-  --font-family: 'Outfit', sans-serif;
+  body {
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+    margin: 0;
+    padding: 0;
+    font-family: 'Outfit', sans-serif;
+    user-select: none;
+    overflow: hidden;
+    transition: background-color 0.3s, color 0.3s;
+  }
 }
 
-body {
-  margin: 0;
-  padding: 0;
-  font-family: var(--font-family);
-  background: radial-gradient(circle at 10% 20%, #1e1b4b 0%, #020617 90%);
-  /* Deep indigo to black */
-  color: var(--text-primary);
-  user-select: none;
-  overflow: hidden;
-  /* App feel */
-}
-
-/* Utilities */
 @layer utilities {
   .glass-panel {
-    @apply bg-[var(--glass-bg)] backdrop-blur-md border border-[var(--glass-border)];
+    background-color: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
   }
 
   .glass-panel-hover {
     background-color: transparent;
     border-color: transparent;
-    transition-property: all;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 300ms;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .glass-panel-hover:hover {

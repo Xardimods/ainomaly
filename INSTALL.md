@@ -1,59 +1,71 @@
-# 📦 Installation Guide
+# 📦 Guía de Instalación
 
-Follow these steps to set up and run the application on a new machine.
+Sigue estos pasos para configurar y ejecutar la aplicación **AInomaly** en una nueva máquina.
 
-## Prerequisites
+## Prerrequisitos
 
-1.  **Python 3.10+**: [Download Here](https://www.python.org/downloads/)
-    *   *Note: Ensure you check "Add Python to PATH" during installation.*
-2.  **Node.js 16+**: [Download Here](https://nodejs.org/)
-
----
-
-## 🚀 Step 1: Backend Setup (Python)
-
-Open a terminal (Command Prompt or PowerShell) and navigate to the project folder.
-
-1.  **Install Dependencies:**
-    ```bash
-    pip install -r requirements.txt
-    ```
-    *This will install YOLOv8 (`ultralytics`), FastAPI, OpenCV, and other required libraries.*
-
-2.  **Start the Backend Server:**
-    ```bash
-    python backend/api.py
-    ```
-    *   You should see `Uvicorn running on http://127.0.0.1:8001`.
-    *   **Keep this terminal open.**
+1.  **Python 3.10+**: [Descargar Aquí](https://www.python.org/downloads/)
+    *   *Nota: Asegúrate de marcar "Add Python to PATH" durante la instalación.*
+2.  **Node.js 18+**: [Descargar Aquí](https://nodejs.org/)
 
 ---
 
-## 💻 Step 2: Frontend Setup (Electron)
+## 🚀 Instalación Rápida
 
-Open a **new** terminal window and navigate to the `electron-app` folder.
+### 1. Configurar Entorno Python
+Abre una terminal (CMD o PowerShell) en la carpeta raíz del proyecto e instala las librerías necesarias:
+
+```bash
+pip install -r requirements.txt
+```
+*Esto instalará `ultralytics` (YOLO), `fastapi`, `opencv-python` y otras dependencias.*
+
+### 2. Configurar Entorno Frontend
+En la misma terminal, navega a la carpeta de la aplicación de escritorio e instala las dependencias de Node.js:
 
 ```bash
 cd electron-app
+npm install
 ```
 
-1.  **Install Dependencies (First time only):**
-    ```bash
-    npm install
-    ```
+---
 
-2.  **Run the App:**
+## 🎮 Ejecución
+
+Para iniciar el sistema completo (La aplicación abrirá automáticamente el backend de Python):
+
+```bash
+# Dentro de la carpeta electron-app
+npm run electron
+```
+
+---
+
+## 🛠️ Ejecución Manual (Modo Debug)
+
+Si prefieres ejecutar los servicios por separado para ver los registros de error detallados:
+
+1.  **Terminal 1 (Backend):**
     ```bash
-    npm run electron
+    # Desde la raíz del proyecto
+    python backend/api.py
+    ```
+    *Deberías ver `Uvicorn running on http://127.0.0.1:8001`*
+
+2.  **Terminal 2 (Frontend):**
+    ```bash
+    # Desde la carpeta electron-app
+    npm run dev
     ```
 
 ---
 
-## 🛠️ Troubleshooting
+## ❓ Solución de Problemas
 
--   **"Module not found" in Python**: Ensure you installed the requirements in the correct environment.
--   **Camera not showing**: Check if another app is using the webcam.
--   **Security Policies (Windows)**: If `npm run electron` fails with a security error, try running:
+-   **"Module not found" en Python**: Asegúrate de haber instalado los `requirements.txt` en el entorno correcto.
+-   **Cámara no visible**: Verifica que ninguna otra aplicación (como Zoom o Teams) esté usando la webcam.
+-   **Políticas de Seguridad (PowerShell)**: Si `npm run electron` falla con un error de permisos en Windows, intenta ejecutar:
     ```cmd
     cmd /c npm run electron
     ```
+-   **Modelo IA**: La primera vez que ejecutes el programa, se descargará automáticamente `yolov8n-pose.pt`. Si esto falla por conexión a internet, descárgalo manualmente y colócalo en `backend/models/`.
