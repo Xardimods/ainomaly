@@ -29,7 +29,7 @@ class PoseService:
         try:
             print(f"[PoseService] Initializing YOLOv8n-pose for Cam {camera_id}...")
             # Load nano model for speed
-            self.model = YOLO('yolov8n-pose.pt') 
+            self.model = YOLO('backend/models/yolov8n-pose.pt') 
             print(f"[PoseService] YOLOv8n-pose initialized for Cam {camera_id}.")
         except Exception as e:
             print(f"[PoseService] WARNING: Vision system disabled. Error: {e}")
