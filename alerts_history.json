@@ -1,0 +1,34 @@
+[
+    {
+        "date": "2025-12-18 14:24:03",
+        "camera": "C\u00e1mara de Prueba",
+        "event": "Ca\u00edda detectada (SIMULACRO)",
+        "status": "Enviado",
+        "details": "Enviado",
+        "snapshot": null
+    },
+    {
+        "date": "2025-12-18 14:47:33",
+        "camera": "C\u00e1mara 4",
+        "event": "Ca\u00edda detectada",
+        "status": "Enviado",
+        "details": "Enviado",
+        "snapshot": "snapshots\\alert_4_1766083650.jpg"
+    },
+    {
+        "date": "2025-12-18 14:58:40",
+        "camera": "C\u00e1mara 4",
+        "event": "Ca\u00edda detectada",
+        "status": "Enviado",
+        "details": "Enviado",
+        "snapshot": "snapshots\\alert_4_1766084318.jpg"
+    },
+    {
+        "date": "2025-12-18 15:01:37",
+        "camera": "C\u00e1mara 4",
+        "event": "Ca\u00edda detectada",
+        "status": "Enviado",
+        "details": "Enviado",
+        "snapshot": "snapshots\\alert_4_1766084495.jpg"
+    }
+]
