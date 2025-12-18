@@ -1,11 +1,10 @@
 import React from 'react';
 import { Save } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
+
 import { useLanguage } from '../context/LanguageContext';
 import { useDialog } from '../context/DialogContext';
 
 const Settings = () => {
-    const { theme, toggleTheme } = useTheme();
     const { language, setLanguage, t } = useLanguage();
     const { alert } = useDialog();
 
@@ -88,18 +87,7 @@ const Settings = () => {
                                 <option className="bg-white dark:bg-slate-900" value="en">English</option>
                             </select>
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300 transition-colors">{t("settings.theme")}</label>
-                            <button
-                                onClick={toggleTheme}
-                                className="w-full flex items-center justify-between bg-slate-100 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-900 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-white/5 transition-all"
-                            >
-                                <span>{theme === 'dark' ? 'Modo Oscuro' : 'Modo Claro'}</span>
-                                <div className={`w-10 h-6 rounded-full p-1 transition-colors ${theme === 'dark' ? 'bg-blue-600' : 'bg-slate-400'}`}>
-                                    <div className={`w-4 h-4 bg-white rounded-full transition-transform ${theme === 'dark' ? 'translate-x-4' : ''}`}></div>
-                                </div>
-                            </button>
-                        </div>
+
                     </div>
                 </div>
 

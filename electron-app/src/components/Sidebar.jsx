@@ -15,10 +15,10 @@ const Sidebar = () => {
     ];
 
     return (
-        <aside className="w-64 h-full flex flex-col p-4 bg-slate-900 border-r border-slate-800 dark:border-white/5 transition-colors">
+        <aside className="w-64 h-full flex flex-col p-4 bg-slate-900 border-r border-white/5 transition-colors">
             {/* Header */}
             <div className="px-4 py-6 mb-4">
-                <h1 className="text-2xl font-bold flex items-center gap-3 tracking-wider text-white">
+                <h1 className="text-2xl font-bold flex items-center gap-3 tracking-wider text-white transition-colors">
                     <div className="relative flex items-center justify-center w-8 h-8 rounded-lg bg-blue-600/20 text-blue-400">
                         <Activity size={20} />
                         <div className="absolute inset-0 bg-blue-500/20 blur-md rounded-lg"></div>
@@ -55,14 +55,14 @@ const Sidebar = () => {
 
             {/* Footer / Status */}
             <div className="mt-auto px-4 py-6">
-                <div className="glass-panel p-4 rounded-xl flex items-center gap-3 border-none bg-white/5">
+                <div className="glass-panel p-4 rounded-xl flex items-center gap-3 border bg-white/5 border-transparent transition-colors">
                     <div className="relative">
                         <span className="block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
                         <span className="absolute inset-0 rounded-full bg-emerald-500 blur-sm animate-pulse"></span>
                     </div>
                     <div>
-                        <p className="text-xs font-semibold text-white">{t('system.online')}</p>
-                        <p className="text-[10px] text-emerald-400/80 tracking-wider">{t('secure.connection')}</p>
+                        <p className="text-xs font-semibold text-white transition-colors">{t('system.online')}</p>
+                        <p className="text-[10px] text-emerald-400/80 tracking-wider transition-colors">{t('secure.connection')}</p>
                     </div>
                 </div>
             </div>
