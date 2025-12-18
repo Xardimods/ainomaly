@@ -1,5 +1,41 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
+const { spawn } = require('child_process');
+
+let backendProcess = null;
+
+const startBackend = () => {
+  // In CJS, __dirname is available directly
+  const rootDir = path.join(__dirname, '..');
+  console.log("Starting Python Backend from:", rootDir);
+
+  // Spawn python process
+  // Assumes 'python' is in PATH. On some systems might be 'python3'
+  backendProcess = spawn('python', ['backend/api.py'], {
+    cwd: rootDir,
+    stdio: 'inherit', // Pipe output to console for debugging
+    shell: true       // fast way to ensure it runs in shell context if needed
+  });
+
+  backendProcess.on('error', (err) => {
+    console.error("Failed to start backend:", err);
+  });
+
+  backendProcess.on('exit', (code, signal) => {
+    console.log(`Backend exited with code ${code} and signal ${signal}`);
+    backendProcess = null;
+  });
+};
+
+const killBackend = () => {
+  if (backendProcess) {
+    console.log("Killing backend process...");
+    // On Windows with shell:true, usually standard kill works for child processes attached to shell
+    // If not, we might need tree-kill, but keeping it simple for now.
+    backendProcess.kill();
+    backendProcess = null;
+  }
+};
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -37,6 +73,7 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  startBackend();
   createWindow();
 
   app.on('activate', () => {
@@ -47,6 +84,7 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
+  killBackend();
   if (process.platform !== 'darwin') {
     app.quit();
   }
