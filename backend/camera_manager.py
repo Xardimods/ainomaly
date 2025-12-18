@@ -57,8 +57,12 @@ class RTSPStream:
                     if isinstance(self.source, int):
                         # WEBCAM (USB)
                         try:
-                            # Suppress excessive OpenCV logging for probing
-                            cv2.utils.logging.setLogLevel(cv2.utils.logging.LOG_LEVEL_ERROR)
+                            # Suppress excessive OpenCV logging for probing (if available)
+                            try:
+                                if hasattr(cv2, 'utils') and hasattr(cv2.utils, 'logging'):
+                                    cv2.utils.logging.setLogLevel(cv2.utils.logging.LOG_LEVEL_ERROR)
+                            except AttributeError:
+                                pass # Older OpenCV versions might not have this
                             
                             print(f"[CAM] Connecting to Webcam {self.source}...")
                             
@@ -85,7 +89,7 @@ class RTSPStream:
                         # Force FFMPEG backend for network streams
                         cap = cv2.VideoCapture(self.source, cv2.CAP_FFMPEG)
                     
-                    if cap.isOpened():
+                    if cap and cap.isOpened():
                         # Set low buffer size to minimize latency
                         cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
                         self.stream = cap
@@ -101,7 +105,7 @@ class RTSPStream:
                         continue
 
                 if self.connected and (time.time() - self.last_read_time) > 5.0 and self.last_read_time > 0:
-                    print(f"[RTSP] Watchdog: No frames for 5s from {self.name}. Reconnecting...")
+                    print(f"[CAM] Watchdog: No frames for 5s from {self.name}. Reconnecting...")
                     self.connected = False
                     if self.stream:
                         self.stream.release()
@@ -117,14 +121,14 @@ class RTSPStream:
                         self.frame = frame
                         self.last_read_time = time.time()
                 else:
-                    print(f"[RTSP] Frame read failed for {self.name} (Ret: {ret}). Reconnecting...")
+                    print(f"[CAM] Frame read failed for {self.name} (Ret: {ret}). Reconnecting...")
                     self.connected = False
                     if self.stream:
                         self.stream.release()
                     time.sleep(1) # Brief pause before reconnect loop takes over
                     
             except Exception as e:
-                print(f"[RTSP] Error in thread for {self.name}: {e}")
+                print(f"[CAM] Error in thread for {self.name}: {e}")
                 self.connected = False
                 if self.stream:
                     self.stream.release()
