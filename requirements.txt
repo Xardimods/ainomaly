@@ -9,3 +9,10 @@ python-telegram-bot
 
 # Configuración y Variables de Entorno (Seguridad)
 python-dotenv
+
+# Visualización y Datos (Dashboard)
+pandas
+plotly
+fastapi
+uvicorn
+python-multipart
