@@ -1,2 +1,26 @@
-venv
+# Dependencies
+node_modules/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Electron / Build
+dist/
+release/
+electron-app/dist/
+electron-app/release/
+electron-app/node_modules/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# App Data
+recordings/
+snapshots/
+*.log
 .env
